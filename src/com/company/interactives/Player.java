@@ -1,6 +1,5 @@
-package com.company;
+package com.company.interactives;
 
-import com.company.Character;
 import com.company.Inventory;
 
 import java.util.Random;
@@ -17,7 +16,7 @@ public class Player extends Character {
 
 
     /**
-     * com.company.Player uses a basic attack on the enemy.
+     * com.company.interactives.Player uses a basic attack on the enemy.
      * @return damage numbers
      */
     public int attack()
@@ -31,7 +30,7 @@ public class Player extends Character {
 
     }
     /**
-     * com.company.Player uses a special attack on the enemy.
+     * com.company.interactives.Player uses a special attack on the enemy.
      * It consumes MP.
      * @return damage numbers
      */
@@ -55,7 +54,7 @@ public class Player extends Character {
     }
 
     /**
-     * com.company.Player uses a health potion if they have one.
+     * com.company.interactives.Player uses a health potion if they have one.
      *
      */
     @Override
@@ -82,7 +81,7 @@ public class Player extends Character {
     }
 
     /**
-     * com.company.Player uses a MP potion if they have one.
+     * com.company.interactives.Player uses a MP potion if they have one.
      *
      */
     @Override
@@ -135,7 +134,4 @@ public class Player extends Character {
     {
         System.out.println("You've chosen to flee! You take off and fly away with your stash of plastic bags.");
     }
-
-
-
 }

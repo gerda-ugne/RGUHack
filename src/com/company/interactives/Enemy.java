@@ -1,6 +1,4 @@
-package com.company;
-
-import com.company.Character;
+package com.company.interactives;
 
 import java.util.Random;
 
@@ -12,7 +10,7 @@ public class Enemy extends Character {
     }
 
     /**
-     * com.company.Enemy uses a basic attack on the player.
+     * com.company.interactives.Enemy uses a basic attack on the player.
      * @return damage numbers
      */
     @Override
@@ -29,7 +27,7 @@ public class Enemy extends Character {
     }
 
     /**
-     * com.company.Enemy uses a special attack on the player.
+     * com.company.interactives.Enemy uses a special attack on the player.
      * It consumes mana.
      * @return damage numbers
      */
@@ -53,7 +51,7 @@ public class Enemy extends Character {
     }
 
     /**
-     * com.company.Enemy heals their health points.
+     * com.company.interactives.Enemy heals their health points.
      *
      */
     @Override
@@ -69,7 +67,7 @@ public class Enemy extends Character {
     }
 
     /**
-     * com.company.Enemy heals their mana points.
+     * com.company.interactives.Enemy heals their mana points.
      *
      */
     @Override
@@ -108,5 +106,4 @@ public class Enemy extends Character {
 
         return damage;
     }
-
 }

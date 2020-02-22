@@ -1,10 +1,9 @@
-package com.company;
-
-import java.util.Scanner;
+package com.company.interactives;
 
 public class NPC extends Character {
 
     private String name;
+
     public NPC()
     {
         super();

@@ -1,7 +1,10 @@
-package com.company;
+package com.company.interactives;
 
-public abstract class Character {
+import com.company.Inventory;
 
+public abstract class Character implements Interactive {
+
+    protected boolean visible;
     private int health;
     public int mana;
     private int currency;
@@ -14,6 +17,16 @@ public abstract class Character {
         mana = 100;
         currency = 100;
 
+    }
+
+    @Override
+    public void setVisibility(boolean visibility) {
+        this.visible = visibility;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return visible;
     }
 
     public int getHealth() {
