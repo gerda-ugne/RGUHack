@@ -16,9 +16,10 @@ public class Field {
         this.down = down;
         this.right = right;
         this.left = left;
+        this.interactive = null;
     }
 
-    public Field(boolean up, boolean down, boolean right, boolean left, Interactive interactive) {
+    public Field(boolean up, boolean down, boolean left, boolean right, Interactive interactive) {
         this.up = up;
         this.down = down;
         this.right = right;

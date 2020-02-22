@@ -1,22 +1,20 @@
 package com.company;
 
-import com.company.interactives.Enemy;
-import com.company.interactives.NPC;
-import com.company.interactives.Player;
-import com.company.interactives.Trap;
+import com.company.interactives.*;
 
 import java.util.Scanner;
 
 public class Game {
 
-    private static final String VERTICAL_WALL_CHAR = "|";
-    private static final String HORIZONTAL_WALL_CHAR = "-";
-    private static final String EMPTY_FIELD_CHAR = " ";
-    private static final String PLAYER_CHAR = "P";
-    private static final String ENEMY_CHAR = "M";
-    private static final String EXIT_CHAR = "W";
-    private static final String NPC_CHAR = "N";
-    private static final String TRAP_CHAR = "T";
+    private static final String VERTICAL_WALL_CHAR = " | ";
+    private static final String HORIZONTAL_WALL_CHAR = "---";
+    private static final String HORIZONTAL_PASSAGE_CHAR = "- -";
+    private static final String EMPTY_FIELD_CHAR = "   ";
+    private static final String PLAYER_CHAR = " P ";
+    private static final String ENEMY_CHAR = " M ";
+    private static final String EXIT_CHAR = " W ";
+    private static final String NPC_CHAR = " N ";
+    private static final String TRAP_CHAR = " T ";
 
     private Player player;
     private Enemy enemy;
@@ -54,7 +52,7 @@ public class Game {
         map[3][1] = new Field(true, false, false, true);
         map[4][1] = new Field(true, true, true, true, trap);
         map[0][2] = new Field(true, false, false, true);
-        map[1][2] = new Field(true, false, true, false, npc);
+        map[1][2] = new Field(true, true, true, false, npc);
         map[2][2] = new Field(true, true, false, true);
         map[3][2] = new Field(false, true, true, true, enemy);
         map[4][2] = new Field(true, false, true, false);
@@ -70,8 +68,47 @@ public class Game {
         map[4][4] = new Field(true, false, true, false);
     }
 
-    private void displayMap() {
+    public void displayMap() {
+        System.out.print(VERTICAL_WALL_CHAR);
+        for (int i = 0; i < width; i++) {
+            Field field = map[i][0];
+//            if (map[i][1].right) {
+//                System.out.println();
+//            }
+            System.out.print((field.up ? EMPTY_FIELD_CHAR : HORIZONTAL_WALL_CHAR) + VERTICAL_WALL_CHAR);
+        }
+        System.out.println();
+        for (int j = 0; j < height; j++) {
+            System.out.print(map[0][j].left ? EMPTY_FIELD_CHAR : VERTICAL_WALL_CHAR);
+            for (int i = 0; i < width; i++) {
+                Field field = map[i][j];
+                System.out.print(getInteractiveChar(field.getInteractive()) + (field.right ? EMPTY_FIELD_CHAR : VERTICAL_WALL_CHAR));
+            }
+            System.out.println();
+            System.out.print(VERTICAL_WALL_CHAR);
+            for (int i = 0; i < width; i++) {
+                Field field = map[i][j];
+                System.out.print((field.down ? EMPTY_FIELD_CHAR : HORIZONTAL_WALL_CHAR) + VERTICAL_WALL_CHAR);
+//                if (map[i][j - 1].right || map[i][j + 1].right) {
+//
+//                }
+            }
+            System.out.println();
+        }
+    }
 
+    private String getInteractiveChar(Interactive interactive) {
+        if (interactive instanceof Player) {
+            return PLAYER_CHAR;
+        } else if (interactive instanceof Enemy) {
+            return ENEMY_CHAR;
+        } else if (interactive instanceof NPC) {
+            return NPC_CHAR;
+        } else if (interactive instanceof Trap) {
+            return TRAP_CHAR;
+        } else {
+            return EMPTY_FIELD_CHAR;
+        }
     }
 
     public void showTradeLog() {
