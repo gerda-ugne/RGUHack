@@ -4,9 +4,7 @@ import java.util.*;
 
 public class Inventory
 {
-    public static final String HP_POTION = "Nutrients - Use these when you're low on health";
-    public static final String MP_POTION = "Wax - Wax restores your energy levels!";
-    private List<String> inventory;
+    private List<Item> inventory;
     private int capacity;
 
     public Inventory() {
@@ -19,15 +17,36 @@ public class Inventory
 //        inventory.add(WAX);
     }
 
-    public void addToInventory(String item) {
+    public List<Item> getInventory() {
+        return inventory;
+    }
+
+    public Item returnItem(String itemName)
+    {
+        for (int i = 0;  i<inventory.size(); i++){
+            String tempName = inventory.get(i).getItemName();
+            if(tempName.equals(itemName)){
+
+                return inventory.get(i);
+            }
+        }
+
+        return null;
+    }
+
+    public void setInventory(List<Item> inventory) {
+        this.inventory = inventory;
+    }
+
+    public void addToInventory(Item item) {
         if (inventory.size() < capacity) {
             inventory.add(item);
         } else System.out.println("Your inventory is full. You cannot pick up any more items!");
     }
 
     public void showInventory() {
-        for (String item : inventory) {
-            System.out.println(item);
+        for (Item item : inventory) {
+            item.showItemInformation();
         }
 
         if(inventory.size() == 0) System.out.println("Your inventory is empty! Pickup some items, trade or kill some monsters.");
@@ -42,7 +61,7 @@ public class Inventory
     {
 
         for (int i = 0;  i<inventory.size(); i++){
-            String tempName = inventory.get(i);
+            String tempName = inventory.get(i).getItemName();
             if(tempName.equals(itemName)){
                 inventory.remove(i);
                 return true;
@@ -59,5 +78,22 @@ public class Inventory
     public void resetInventory()
     {
         this.inventory = new ArrayList<>();
+    }
+
+    /**
+     * Finds an item in your inventory
+     * @return true/false if the item was found
+     */
+    public boolean findInInventory(String itemName)
+    {
+        for (int i = 0;  i<inventory.size(); i++){
+            String tempName = inventory.get(i).getItemName();
+            if(tempName.equals(itemName)){
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }

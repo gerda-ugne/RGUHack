@@ -87,6 +87,7 @@ public class Game {
         do {
             System.out.println("Your inventory:\n");
             player.showInventory();
+            System.out.println("You currently have " + player.getCurrency() + " coins.\n");
 
             System.out.println(npc.getName() + "'s inventory:");
             npc.showInventory();
@@ -119,19 +120,25 @@ public class Game {
 
     }
 
-    public void sellItems()
-    {
+    public void sellItems() {
         System.out.println("Please state what item you want to sell:");
         player.showInventory();
 
         Scanner s = new Scanner(System.in);
         String input;
 
-            input = s.nextLine();
-            switch(input)
-            {
-
-            }
+        input = s.nextLine();
+        //If item is found in inventory
+        if (player.getInv().findInInventory(input))
+        {
+            player.getInv().remove(input);
+            player.setCurrency(player.getCurrency() + player.getInv().returnItem(input).getPrice());
+        }
+        else
+        {
+            //If item doesn't exist
+            System.out.println("Item not found! Try again");
+        }
 
     }
 
