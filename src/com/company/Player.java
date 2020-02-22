@@ -1,3 +1,8 @@
+package com.company;
+
+import com.company.Character;
+import com.company.Inventory;
+
 import java.util.Random;
 
 public class Player extends Character {
@@ -12,7 +17,7 @@ public class Player extends Character {
 
 
     /**
-     * Player uses a basic attack on the enemy.
+     * com.company.Player uses a basic attack on the enemy.
      * @return damage numbers
      */
     public int attack()
@@ -26,7 +31,7 @@ public class Player extends Character {
 
     }
     /**
-     * Player uses a special attack on the enemy.
+     * com.company.Player uses a special attack on the enemy.
      * It consumes MP.
      * @return damage numbers
      */
@@ -50,7 +55,7 @@ public class Player extends Character {
     }
 
     /**
-     * Player uses a health potion if they have one.
+     * com.company.Player uses a health potion if they have one.
      *
      */
     @Override
@@ -77,7 +82,7 @@ public class Player extends Character {
     }
 
     /**
-     * Player uses a MP potion if they have one.
+     * com.company.Player uses a MP potion if they have one.
      *
      */
     @Override

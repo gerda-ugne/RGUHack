@@ -1,3 +1,5 @@
+package com.company;
+
 public abstract class Character {
 
     private int health;
