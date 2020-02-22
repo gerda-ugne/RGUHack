@@ -104,6 +104,9 @@ public class Game {
         }
     }
 
+    /**
+     * Displays the trade log when the player encounters a NPC and chooses the trade option.
+     */
     public void showTradeLog() {
         System.out.println("You have opened the trade log. You can buy valuable items that will aid you in your journey");
         System.out.println("You can also sell items from your inventory. However, note that you cannot re-buy them.\n");
@@ -116,11 +119,11 @@ public class Game {
         //Looped until user exits
         do {
             System.out.println("Your inventory:\n");
-            player.showInventory();
+            player.getInv().showInventory();
             System.out.println("You currently have " + player.getCurrency() + " coins.\n");
 
             System.out.println(npc.getName() + "'s inventory:");
-            npc.showInventory();
+            npc.getInv().showInventory();
 
             System.out.println("Do you want to buy or sell items?\n");
             System.out.println("1. Buy");
@@ -150,19 +153,85 @@ public class Game {
 
     }
 
+    /**
+     * Method for selling items. This option is selected from the trade log.
+     */
     public void sellItems() {
-        System.out.println("Please state what item you want to sell:");
-        player.showInventory();
+
+        do {
+
+            System.out.println("\nPlease state what item you want to sell, or enter 'return' to return:");
+            player.getInv().showInventory();
+
+            Scanner s = new Scanner(System.in);
+            String input;
+
+            input = s.nextLine();
+            if(input == "return") return;
+            //If item is found in inventory
+            if (player.getInv().findInInventory(input))
+            {
+                player.setCurrency(player.getCurrency() + player.getInv().returnItem(input).getPrice());
+                player.getInv().remove(input);
+                npc.getInv().addToInventory(input);
+                System.out.println("\nYou currently have: " + player.getCurrency() + " coins.");
+            }
+            else
+            {
+                //If item doesn't exist
+                System.out.println("Item not found! Try again");
+            }
+
+            // Additional menu, restarts if input is wrong
+            do {
+
+                System.out.println("\nDo you want to sell more items?\n");
+                System.out.println("1. Yes, I have goods to provide");
+                System.out.println("2. No, take me back to the trade log");
+
+                input = s.nextLine();
+                switch (input)
+                {
+                    case "1": break;
+                    case "2": return;
+                    default: System.out.println("Invalid option! Please choose an integer 1 or 2.");
+                }
+
+            } while (!(input.equals("1")));
+
+        } while (true);
+
+
+    }
+
+    /**
+     * Method for buying items. This option is accessible from the trade log.
+     */
+    public void buyItems()
+    {
+        System.out.println("\nPlease state what item you want to buy, or enter 'return' to return:");
 
         Scanner s = new Scanner(System.in);
         String input;
 
         input = s.nextLine();
-        //If item is found in inventory
-        if (player.getInv().findInInventory(input))
+        if(input == "return") return;
+        //If item is found in NPC inventory
+        if (npc.getInv().findInInventory(input))
         {
-            player.getInv().remove(input);
-            player.setCurrency(player.getCurrency() + player.getInv().returnItem(input).getPrice());
+            //Checks if player can afford the item
+            if(player.getCurrency() >= npc.getInv().returnItem(input).getPrice())
+            {
+                player.setCurrency(player.getCurrency() - npc.getInv().returnItem(input).getPrice());
+                npc.getInv().remove(input);
+                player.getInv().addToInventory(input);
+                System.out.println("\nYou currently have: " + player.getCurrency() + " coins.");
+            }
+            else
+            {
+                System.out.println("You do not have enough coins to buy this item.");
+            }
+
         }
         else
         {
@@ -170,11 +239,22 @@ public class Game {
             System.out.println("Item not found! Try again");
         }
 
-    }
+        // Additional menu, restarts if input is wrong
+        do {
 
-    public void buyItems()
-    {
+            System.out.println("\nDo you want to buy more items?\n");
+            System.out.println("1. Yes, I'm interested in more goods");
+            System.out.println("2. No, take me back to the trade log");
 
+            input = s.nextLine();
+            switch (input)
+            {
+                case "1": break;
+                case "2": return;
+                default: System.out.println("Invalid option! Please choose an integer 1 or 2.");
+            }
+
+        } while (!(input.equals("1")));
     }
 
 }
