@@ -68,26 +68,30 @@ public class Game {
     }
 
     public void displayMap() {
-        System.out.print(VERTICAL_WALL_CHAR);
+        displayRowDivider(-1);
+        for (int j = 0; j < height; j++) {
+            displayDataRow(j);
+            displayRowDivider(j);
+        }
+    }
+
+    private void displayDataRow(int row) {
+        System.out.print(map[0][row].left ? EMPTY_FIELD_CHAR : VERTICAL_WALL_CHAR);
         for (int i = 0; i < width; i++) {
-            Field field = map[i][0];
-            System.out.print((field.up ? EMPTY_FIELD_CHAR : HORIZONTAL_WALL_CHAR) + VERTICAL_WALL_CHAR);
+            Field field = map[i][row];
+            System.out.print(getInteractiveChar(field.getInteractive()) + (field.right ? EMPTY_FIELD_CHAR : VERTICAL_WALL_CHAR));
         }
         System.out.println();
-        for (int j = 0; j < height; j++) {
-            System.out.print(map[0][j].left ? EMPTY_FIELD_CHAR : VERTICAL_WALL_CHAR);
-            for (int i = 0; i < width; i++) {
-                Field field = map[i][j];
-                System.out.print(getInteractiveChar(field.getInteractive()) + (field.right ? EMPTY_FIELD_CHAR : VERTICAL_WALL_CHAR));
-            }
-            System.out.println();
-            System.out.print(VERTICAL_WALL_CHAR);
-            for (int i = 0; i < width; i++) {
-                Field field = map[i][j];
-                System.out.print((field.down ? EMPTY_FIELD_CHAR : HORIZONTAL_WALL_CHAR) + VERTICAL_WALL_CHAR);
-            }
-            System.out.println();
+    }
+
+    private void displayRowDivider(int upperRowIndex) {
+        boolean top = upperRowIndex < 0;
+        System.out.print(VERTICAL_WALL_CHAR);
+        for (int i = 0; i < width; i++) {
+            Field field = map[i][top ? 0 : upperRowIndex];
+            System.out.print(((top ? field.down : field.up) ? EMPTY_FIELD_CHAR : HORIZONTAL_WALL_CHAR) + VERTICAL_WALL_CHAR);
         }
+        System.out.println();
     }
 
     private String getInteractiveChar(Interactive interactive) {
