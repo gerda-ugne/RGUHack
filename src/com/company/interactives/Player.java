@@ -61,7 +61,7 @@ public class Player extends Character {
     public void healHP()
     {
         boolean itemFound = false;
-        itemFound = getInv().remove(Inventory.HP_POTION);
+        itemFound = getInv().remove("HP_POTION");
 
         if(itemFound == true)
         {
@@ -88,7 +88,7 @@ public class Player extends Character {
     public void healMP()
     {
         boolean itemFound = false;
-        itemFound = getInv().remove(Inventory.MP_POTION);
+        itemFound = getInv().remove("MP_Potion");
 
 
         if(itemFound == true)

@@ -213,52 +213,54 @@ public class Game {
      */
     public void buyItems()
     {
-        System.out.println("\nPlease state what item you want to buy, or enter 'return' to return:");
+        do {
+            System.out.println("\nPlease state what item you want to buy, or enter 'return' to return:");
 
-        Scanner s = new Scanner(System.in);
-        String input;
+            Scanner s = new Scanner(System.in);
+            String input;
 
-        input = s.nextLine();
-        if(input == "return") return;
-        //If item is found in NPC inventory
-        if (npc.getInv().findInInventory(input))
-        {
-            //Checks if player can afford the item
-            if(player.getCurrency() >= npc.getInv().returnItem(input).getPrice())
+            input = s.nextLine();
+            if(input == "return") return;
+            //If item is found in NPC inventory
+            if (npc.getInv().findInInventory(input))
             {
-                player.setCurrency(player.getCurrency() - npc.getInv().returnItem(input).getPrice());
-                npc.getInv().remove(input);
-                player.getInv().addToInventory(input);
-                System.out.println("\nYou currently have: " + player.getCurrency() + " coins.");
+                //Checks if player can afford the item
+                if(player.getCurrency() >= npc.getInv().returnItem(input).getPrice())
+                {
+                    player.setCurrency(player.getCurrency() - npc.getInv().returnItem(input).getPrice());
+                    npc.getInv().remove(input);
+                    player.getInv().addToInventory(input);
+                    System.out.println("\nYou currently have: " + player.getCurrency() + " coins.");
+                }
+                else
+                {
+                    System.out.println("You do not have enough coins to buy this item.");
+                }
+
             }
             else
             {
-                System.out.println("You do not have enough coins to buy this item.");
+                //If item doesn't exist
+                System.out.println("Item not found! Try again");
             }
 
-        }
-        else
-        {
-            //If item doesn't exist
-            System.out.println("Item not found! Try again");
-        }
+            // Additional menu, restarts if input is wrong
+            do {
 
-        // Additional menu, restarts if input is wrong
-        do {
+                System.out.println("\nDo you want to buy more items?\n");
+                System.out.println("1. Yes, I'm interested in more goods");
+                System.out.println("2. No, take me back to the trade log");
 
-            System.out.println("\nDo you want to buy more items?\n");
-            System.out.println("1. Yes, I'm interested in more goods");
-            System.out.println("2. No, take me back to the trade log");
+                input = s.nextLine();
+                switch (input)
+                {
+                    case "1": break;
+                    case "2": return;
+                    default: System.out.println("Invalid option! Please choose an integer 1 or 2.");
+                }
 
-            input = s.nextLine();
-            switch (input)
-            {
-                case "1": break;
-                case "2": return;
-                default: System.out.println("Invalid option! Please choose an integer 1 or 2.");
-            }
-
-        } while (!(input.equals("1")));
+            } while (!(input.equals("1")));
+        } while (true);
     }
 
 }
