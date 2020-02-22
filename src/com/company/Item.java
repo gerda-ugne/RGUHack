@@ -2,23 +2,25 @@ package com.company;
 
 public class Item {
 
-    private String itemName;
+    String itemName;
     private int price;
 
     public Item()
     {
         itemName = "default";
-        price = 0;
+        price = 30;
+    }
+    public Item(String name, int price)
+    {
+        itemName = name;
+        this.price = price;
 
     }
-
     public void showItemInformation()
     {
-        System.out.println(itemName + ". Its price is " + price);
+        System.out.println( itemName+ ". Its price is " + price);
     }
-    public String getItemName() {
-        return itemName;
-    }
+
 
     public void setItemName(String itemName) {
         this.itemName = itemName;
@@ -32,4 +34,7 @@ public class Item {
         this.price = price;
     }
 
+    public String getItemName() {
+        return itemName;
+    }
 }

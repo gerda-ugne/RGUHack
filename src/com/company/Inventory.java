@@ -38,10 +38,13 @@ public class Inventory
         this.inventory = inventory;
     }
 
-    public void addToInventory(Item item) {
+    public void addToInventory(String itemName) {
+
+        Item item = new Item(itemName, 30);
+
         if (inventory.size() < capacity) {
-            inventory.add(item);
-        } else System.out.println("Your inventory is full. You cannot pick up any more items!");
+            inventory.add(item); }
+        else System.out.println("Your inventory is full. You cannot pick up any more items!");
     }
 
     public void showInventory() {

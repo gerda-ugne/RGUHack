@@ -61,15 +61,6 @@ public abstract class Character extends Position implements Interactive {
         this.inv = inv;
     }
 
-    public void addToInventory(String item) {
-        inv.addToInventory(item);
-    }
-
-
-    public void showInventory() {
-        getInv().showInventory();
-    }
-
     public boolean isCharacterAlive()
     {
         return getHealth() > 0;
