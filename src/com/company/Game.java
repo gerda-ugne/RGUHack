@@ -1,19 +1,21 @@
 package com.company;
 
 import com.company.interactives.*;
+import com.company.map.Field;
 
 import java.util.Scanner;
 
 public class Game {
 
-    private static final String VERTICAL_WALL_CHAR = " | ";
-    private static final String HORIZONTAL_WALL_CHAR = "---";
-    private static final String EMPTY_FIELD_CHAR = "   ";
-    private static final String PLAYER_CHAR = " P ";
-    private static final String ENEMY_CHAR = " M ";
-    private static final String EXIT_CHAR = " E ";
-    private static final String NPC_CHAR = " N ";
-    private static final String TRAP_CHAR = " T ";
+    private static final String VERTICAL_WALL = "|";
+    private static final String HORIZONTAL_WALL = "---";
+    private static final String EMPTY_FIELD = "   ";
+    private static final String NO_WALL = " ";
+    private static final String PLAYER = " P ";
+    private static final String ENEMY = " M ";
+    private static final String EXIT = " E ";
+    private static final String NPC = " N ";
+    private static final String TRAP = " T ";
 
     private Player player;
     private Enemy enemy;
@@ -28,6 +30,7 @@ public class Game {
     public Game()
     {
         player = new Player();
+        player.setPosition(2, 2);
         enemy = new Enemy();
         npc = new NPC();
         trap = new Trap();
@@ -68,43 +71,73 @@ public class Game {
     }
 
     public void displayMap() {
-        displayRowDivider(-1);
-        for (int j = 0; j < height; j++) {
+        for (int j = player.getY() - 2; j <= player.getY() + 2; j++) {
+            displayRowUpperBorders(j);
             displayDataRow(j);
-            displayRowDivider(j);
         }
+        displayRowBottomBorders(player.getY() + 2);
     }
 
     private void displayDataRow(int row) {
-        System.out.print(map[0][row].left ? EMPTY_FIELD_CHAR : VERTICAL_WALL_CHAR);
-        for (int i = 0; i < width; i++) {
-            Field field = map[i][row];
-            System.out.print(getInteractiveChar(field.getInteractive()) + (field.right ? EMPTY_FIELD_CHAR : VERTICAL_WALL_CHAR));
+        for (int i = player.getX() - 2; i <= player.getX() + 2; i++) {
+            Field field;
+            try {
+                field = map[i][row];
+                System.out.print((field.left ? NO_WALL : VERTICAL_WALL) + getInteractiveChar(field.getInteractive()));
+            } catch (IndexOutOfBoundsException e) {
+                System.out.print(NO_WALL + EMPTY_FIELD);
+            }
         }
-        System.out.println();
+        if (row >= 0 && row < height) {
+            System.out.println(map[width - 1][row].right ? NO_WALL : VERTICAL_WALL);
+        } else {
+            System.out.println(NO_WALL);
+        }
     }
 
-    private void displayRowDivider(int upperRowIndex) {
-        boolean top = upperRowIndex < 0;
-        System.out.print(VERTICAL_WALL_CHAR);
-        for (int i = 0; i < width; i++) {
-            Field field = map[i][top ? 0 : upperRowIndex];
-            System.out.print(((top ? field.down : field.up) ? EMPTY_FIELD_CHAR : HORIZONTAL_WALL_CHAR) + VERTICAL_WALL_CHAR);
+    private void displayRowUpperBorders(int row) {
+        for (int i = player.getX() - 2; i <= player.getX() + 2; i++) {
+            try {
+                Field field = map[i][row];
+                System.out.print(VERTICAL_WALL + (field.up ? EMPTY_FIELD : HORIZONTAL_WALL));
+            } catch (IndexOutOfBoundsException e) {
+                System.out.print(NO_WALL + EMPTY_FIELD);
+            }
         }
-        System.out.println();
+        if (row >= 0 && row < height) {
+            System.out.println(VERTICAL_WALL);
+        } else {
+            System.out.println(NO_WALL);
+        }
+    }
+
+    private void displayRowBottomBorders(int row) {
+        for (int i = player.getX() - 2; i <= player.getX() + 2; i++) {
+            try {
+                Field field = map[i][row];
+                System.out.print(VERTICAL_WALL + (field.down ? EMPTY_FIELD : HORIZONTAL_WALL));
+            } catch (IndexOutOfBoundsException e) {
+                System.out.print(NO_WALL + EMPTY_FIELD);
+            }
+        }
+        if (row >= 0 && row < height) {
+            System.out.println(VERTICAL_WALL);
+        } else {
+            System.out.println(NO_WALL);
+        }
     }
 
     private String getInteractiveChar(Interactive interactive) {
         if (interactive instanceof Player) {
-            return PLAYER_CHAR;
+            return PLAYER;
         } else if (interactive instanceof Enemy) {
-            return ENEMY_CHAR;
+            return ENEMY;
         } else if (interactive instanceof NPC) {
-            return NPC_CHAR;
+            return NPC;
         } else if (interactive instanceof Trap) {
-            return TRAP_CHAR;
+            return TRAP;
         } else {
-            return EMPTY_FIELD_CHAR;
+            return EMPTY_FIELD;
         }
     }
 
