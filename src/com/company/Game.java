@@ -259,4 +259,88 @@ public class Game {
         } while (true);
     }
 
+    /**
+     * Moves player in a selected location
+     * @param direction - input taken from the user
+     * @return true/false depending on whether the player can move
+     */
+    public boolean movePlayer(char direction)
+    {
+        int playerX = player.getX();
+        int playerY = player.getY();
+
+        boolean canMove = false;
+        int sizeOfField = 2;
+
+        try {
+            //up
+            if(direction == 'u')
+            {
+                canMove = map[playerX][playerY].up;
+                if(canMove)
+                {
+                    player.setY(playerY+sizeOfField);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            //left
+            else if(direction == 'l')
+            {
+                canMove = map[playerX][playerY].left;
+                if(canMove)
+                {
+                    player.setX(playerX-sizeOfField);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            //right
+            else if(direction == 'r')
+            {
+                canMove = map[playerX][playerY].right;
+                if(canMove)
+                {
+                    player.setX(playerX + sizeOfField);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            //down
+            else if(direction == 'd')
+            {
+                canMove = map[playerX][playerY].down;
+                if(canMove)
+                {
+                    player.setY(playerY - sizeOfField);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            else
+            {
+                //Invalid input therefore cannot move
+                return false;
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+
+            return false;
+        }
+    }
+
 }
