@@ -70,7 +70,42 @@ public class Menu
 
             switch(input)
             {
-//                case "1": movePlayer(); break;
+                case "1":
+                {
+                    boolean canMove;
+                    Scanner sc = new Scanner(System.in);
+                    String choice;
+
+
+                    do {
+
+                        game.displayMap();
+                        System.out.println("\nChoose your direction of floating:");
+
+                        System.out.println("u to go up");
+                        System.out.println("d to go down");
+                        System.out.println("l to go left");
+                        System.out.println("r to go right");
+
+                        System.out.println("enter 0 to return");
+
+                        input = s.nextLine();
+                        if(input.equals("0")) return;
+                        canMove = game.movePlayer(input);
+
+                        if(canMove)
+                        {
+                            System.out.println("You have moved.\n");
+                            game.displayMap();
+                        }
+                        else
+                        {
+                            System.out.println("Moving in that direction is forbidden!");
+                        }
+
+                    } while (!canMove);
+
+                } break;
 //                case "2": saveGame(); break;
 //                case "3": checkStatus(); break;
 //                case "4": showInventory();break;

@@ -30,7 +30,7 @@ public class Game {
     public Game()
     {
         player = new Player();
-        player.setPosition(2, 2);
+        player.setPosition(0,4);
         enemy = new Enemy();
         npc = new NPC();
         trap = new Trap();
@@ -301,22 +301,30 @@ public class Game {
      * @param direction - input taken from the user
      * @return true/false depending on whether the player can move
      */
-    public boolean movePlayer(char direction)
+    public boolean movePlayer(String direction)
     {
         int playerX = player.getX();
         int playerY = player.getY();
 
         boolean canMove = false;
-        int sizeOfField = 2;
+        int sizeOfField = 1;
 
         try {
             //up
-            if(direction == 'u')
+            if(direction.equals("u"))
             {
                 canMove = map[playerX][playerY].up;
                 if(canMove)
                 {
-                    player.setY(playerY+sizeOfField);
+                    //Sets new position of the player
+                    player.setY(playerY-sizeOfField);
+
+                    //Sets old position to have no interaction
+                    map[playerX][playerY].setInteractive(null);
+
+                    //Sets new player position to have the marker of the player
+                    map[playerX][player.getY()].setInteractive(player);
+
                     return true;
                 }
                 else
@@ -325,12 +333,19 @@ public class Game {
                 }
             }
             //left
-            else if(direction == 'l')
+            else if(direction.equals("l"))
             {
                 canMove = map[playerX][playerY].left;
                 if(canMove)
                 {
                     player.setX(playerX-sizeOfField);
+
+                    //Sets old position to have no interaction
+                    map[playerX][playerY].setInteractive(null);
+
+                    //Sets new player position to have the marker of the player
+                    map[player.getX()][playerY].setInteractive(player);
+
                     return true;
                 }
                 else
@@ -340,12 +355,18 @@ public class Game {
 
             }
             //right
-            else if(direction == 'r')
+            else if(direction.equals("r"))
             {
                 canMove = map[playerX][playerY].right;
                 if(canMove)
                 {
                     player.setX(playerX + sizeOfField);
+
+                    //Sets old position to have no interaction
+                    map[playerX][playerY].setInteractive(null);
+
+                    //Sets new player position to have the marker of the player
+                    map[player.getX()][playerY].setInteractive(player);
                     return true;
                 }
                 else
@@ -355,12 +376,18 @@ public class Game {
 
             }
             //down
-            else if(direction == 'd')
+            else if(direction.equals("d"))
             {
                 canMove = map[playerX][playerY].down;
                 if(canMove)
                 {
-                    player.setY(playerY - sizeOfField);
+                    player.setY(playerY + sizeOfField);
+
+                    //Sets old position to have no interaction
+                    map[playerX][playerY].setInteractive(null);
+
+                    //Sets new player position to have the marker of the player
+                    map[playerX][player.getY()].setInteractive(player);
                     return true;
                 }
                 else
@@ -376,6 +403,7 @@ public class Game {
             }
         } catch (ArrayIndexOutOfBoundsException e) {
 
+            //If out of boundaries cannot move
             return false;
         }
     }

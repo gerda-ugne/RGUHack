@@ -1,4 +1,4 @@
-package com.company;
+package com.company.map;
 
 import com.company.interactives.Interactive;
 
