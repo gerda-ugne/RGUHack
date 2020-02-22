@@ -132,6 +132,20 @@ public class Player extends Character {
 
     public void flee()
     {
-        System.out.println("You've chosen to flee! You take off and fly away with your stash of plastic bags.");
+        System.out.println("You've chosen to flee your nightmares.");
+    }
+
+    public boolean checkForTrap()
+    {
+        boolean hasRock = getInv().findInInventory("Rock");
+        if(hasRock)
+        {
+
+        }
+        else
+        {
+            System.out.println("You don't have enough rocks to perform this action.");
+        }
+        return true;
     }
 }

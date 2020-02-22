@@ -25,6 +25,11 @@ public class Game {
     private int width;
     private int height;
 
+    private Interactive tempInteractive;
+    private String lastDirection;
+    private int lastX;
+    private int lastY;
+
     private Field[][] map;
 
     public Game()
@@ -39,6 +44,7 @@ public class Game {
         height = 5;
 
         map = new Field[width][height];
+        lastDirection = " ";
         createMap();
     }
 
@@ -139,6 +145,18 @@ public class Game {
         } else {
             return EMPTY_FIELD;
         }
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public Enemy getEnemy() {
+        return enemy;
+    }
+
+    public com.company.interactives.NPC getNpc() {
+        return npc;
     }
 
     /**
@@ -316,6 +334,9 @@ public class Game {
                 canMove = map[playerX][playerY].up;
                 if(canMove)
                 {
+
+                    //Saves old interactive
+                    tempInteractive = map[playerX][playerY-sizeOfField].getInteractive();
                     //Sets new position of the player
                     player.setY(playerY-sizeOfField);
 
@@ -324,6 +345,19 @@ public class Game {
 
                     //Sets new player position to have the marker of the player
                     map[playerX][player.getY()].setInteractive(player);
+
+
+                    lastX = player.getX();
+                    lastY = player.getY();
+
+                    //Puts down the old interactive
+                    if(!(tempInteractive == null) && !(tempInteractive.equals(player)))
+                    {
+                        map[lastX][lastY].setInteractive(tempInteractive);
+
+                    }
+
+
 
                     return true;
                 }
@@ -338,13 +372,26 @@ public class Game {
                 canMove = map[playerX][playerY].left;
                 if(canMove)
                 {
+                    //Saves old interactive
+                    tempInteractive = map[playerX-sizeOfField][playerY].getInteractive();
                     player.setX(playerX-sizeOfField);
 
                     //Sets old position to have no interaction
+
                     map[playerX][playerY].setInteractive(null);
 
                     //Sets new player position to have the marker of the player
                     map[player.getX()][playerY].setInteractive(player);
+
+                    lastX = player.getX();
+                    lastY = player.getY();
+
+                    //Puts down the old interactive
+                    if(!(tempInteractive == null) && !(tempInteractive.equals(player)))
+                    {
+                        map[lastX][lastY].setInteractive(tempInteractive);
+
+                    }
 
                     return true;
                 }
@@ -360,6 +407,8 @@ public class Game {
                 canMove = map[playerX][playerY].right;
                 if(canMove)
                 {
+                    //Saves old interactive
+                    tempInteractive = map[playerX+sizeOfField][playerY].getInteractive();
                     player.setX(playerX + sizeOfField);
 
                     //Sets old position to have no interaction
@@ -367,6 +416,17 @@ public class Game {
 
                     //Sets new player position to have the marker of the player
                     map[player.getX()][playerY].setInteractive(player);
+
+
+                    lastX = player.getX();
+                    lastY = player.getY();
+
+                    //Puts down the old interactive
+                    if(!(tempInteractive == null) && !(tempInteractive.equals(player)))
+                    {
+                        map[lastX][lastY].setInteractive(tempInteractive);
+
+                    }
                     return true;
                 }
                 else
@@ -381,6 +441,8 @@ public class Game {
                 canMove = map[playerX][playerY].down;
                 if(canMove)
                 {
+                    //Saves old interactive
+                    tempInteractive = map[playerX][playerY+sizeOfField].getInteractive();
                     player.setY(playerY + sizeOfField);
 
                     //Sets old position to have no interaction
@@ -388,6 +450,18 @@ public class Game {
 
                     //Sets new player position to have the marker of the player
                     map[playerX][player.getY()].setInteractive(player);
+
+
+                    lastX = player.getX();
+                    lastY = player.getY();
+
+                    //Puts down the old interactive
+                    if(!(tempInteractive == null) && !(tempInteractive.equals(player)))
+                    {
+                        map[lastX][lastY].setInteractive(tempInteractive);
+
+                    }
+
                     return true;
                 }
                 else
