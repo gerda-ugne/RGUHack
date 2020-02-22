@@ -2,7 +2,7 @@ package com.company.interactives;
 
 import com.company.Inventory;
 
-public abstract class Character implements Interactive {
+public abstract class Character extends Position implements Interactive {
 
     protected boolean visible;
     private int health;

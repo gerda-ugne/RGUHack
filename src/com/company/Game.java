@@ -8,11 +8,10 @@ public class Game {
 
     private static final String VERTICAL_WALL_CHAR = " | ";
     private static final String HORIZONTAL_WALL_CHAR = "---";
-    private static final String HORIZONTAL_PASSAGE_CHAR = "- -";
     private static final String EMPTY_FIELD_CHAR = "   ";
     private static final String PLAYER_CHAR = " P ";
     private static final String ENEMY_CHAR = " M ";
-    private static final String EXIT_CHAR = " W ";
+    private static final String EXIT_CHAR = " E ";
     private static final String NPC_CHAR = " N ";
     private static final String TRAP_CHAR = " T ";
 
@@ -72,9 +71,6 @@ public class Game {
         System.out.print(VERTICAL_WALL_CHAR);
         for (int i = 0; i < width; i++) {
             Field field = map[i][0];
-//            if (map[i][1].right) {
-//                System.out.println();
-//            }
             System.out.print((field.up ? EMPTY_FIELD_CHAR : HORIZONTAL_WALL_CHAR) + VERTICAL_WALL_CHAR);
         }
         System.out.println();
@@ -89,9 +85,6 @@ public class Game {
             for (int i = 0; i < width; i++) {
                 Field field = map[i][j];
                 System.out.print((field.down ? EMPTY_FIELD_CHAR : HORIZONTAL_WALL_CHAR) + VERTICAL_WALL_CHAR);
-//                if (map[i][j - 1].right || map[i][j + 1].right) {
-//
-//                }
             }
             System.out.println();
         }
