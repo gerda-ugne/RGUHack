@@ -19,12 +19,18 @@ public class Game {
     private static final String NPC = " N ";
     private static final String TRAP = " T ";
 
+    private static final int ENEMIES_PERCENT = 12;
+    private static final int NPCS_PERCENT = 6;
+    private static final int TRAPS_PERCENT = 8;
+
     private Random rnd;
 
     private int width;
     private int height;
 
     private int viewDistance;
+
+    private Field[][] map;
 
     private Player player;
     private Enemy enemy;
@@ -33,32 +39,27 @@ public class Game {
 
     private Interactive tempInteractive;
 
-    private Field[][] map;
-
     public Game()
     {
-        width = 10;
-        height = 10;
-
-        viewDistance = 2;
-
         rnd = new Random();
+
+        width = 20;
+        height = 10;
+        viewDistance = 20;
+
         player = new Player();
-        enemy = new Enemy();
-        npc = new NPC();
-        trap = new Trap();
         tempInteractive = null;
 
-//        player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
-        player.setPosition(0, 0);
-        enemy.setPosition(0, 1);
-        trap.setPosition(1, 0);
+        player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
+//        player.setPosition(0, 0);
+//        enemy.setPosition(0, 1);
+//        trap.setPosition(1, 0);
 
         map = new Field[width][height];
         createMap();
+
         map[player.getX()][player.getY()].setInteractive(player);
-        map[enemy.getX()][enemy.getY()].setInteractive(enemy);
-        map[trap.getX()][trap.getY()].setInteractive(trap);
+        generateMapItems();
     }
 
     private void createMap() {
@@ -130,6 +131,77 @@ public class Game {
         } while (!neighbors.isEmpty());
     }
 
+    int enemyNum;
+    int npcNum;
+    int trapNum;
+
+    private void generateMapItems() {
+        float max = width * height;
+        enemyNum = Math.round(max * ENEMIES_PERCENT / 100);
+        npcNum = Math.round(max * NPCS_PERCENT / 100);
+        trapNum = Math.round(max * TRAPS_PERCENT / 100);
+
+        for (int i = 0; i < width; i += 2) {
+            for (int j = 0; j < height; j += 2) {
+                placeInteractive(
+                        i == 0 ? 0 : i - 1,
+                        i >= width - 1 ? width - 2 : i + 2,
+                        j == 0 ? 0 : j - 1,
+                        j >= height - 1 ? height - 2 : j + 2
+                );
+            }
+        }
+        while (enemyNum + npcNum + trapNum > 0) {
+            placeInteractive(0, width, 0, height);
+        }
+    }
+
+    private void placeInteractive(int xMin, int xMax, int yMin, int yMax) {
+        Interactive interactive = null;
+        int x = 0;
+        int y = 0;
+        boolean allowed = false;
+
+        while (!allowed) {
+            do {
+                x = rnd.nextInt(xMax - xMin) + xMin;
+                y = rnd.nextInt(yMax - yMin) + yMin;
+            } while (map[x][y].getInteractive() != null);
+            switch (rnd.nextInt(3)) {
+                case 0:
+                    interactive = enemyNum > 0 ? new Enemy() : null;
+                    break;
+                case 1:
+                    interactive = npcNum > 0 ? new NPC() : null;
+                    break;
+                case 2:
+                    interactive = trapNum > 0 ? new Trap() : null;
+            }
+            allowed = isPlacementAllowed(interactive, x, y);
+        }
+        interactive.setPosition(x, y);
+        map[x][y].setInteractive(interactive);
+        if (interactive instanceof Enemy) enemyNum--;
+        else if (interactive instanceof NPC) npcNum--;
+        else if (interactive instanceof Trap) trapNum--;
+        displayMap();
+    }
+
+    private boolean isPlacementAllowed(Interactive interactive, int x, int y) {
+        if (interactive == null) {
+            return false;
+        }
+        for (int i = (x == 0 ? x : x - 1); i <= (x >= width - 1 ? x : x + 1); i++) {
+            for (int j = (y == 0 ? y : y - 1); j <= (j >= height - 1 ? y : j + 1); j++) {
+                Interactive existing = map[i][j].getInteractive();
+                if (existing != null && interactive.getClass().equals(existing.getClass())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public void displayMap() {
         for (int j = player.getY() - viewDistance; j < player.getY() + viewDistance; j++) {
             displayRowUpperBorders(j);
@@ -190,7 +262,11 @@ public class Game {
         if (interactive instanceof Player) {
             return PLAYER;
         } else if (interactive instanceof Enemy) {
-            return ENEMY;
+            if (((Enemy) interactive).isCharacterAlive()) {
+                return ENEMY;
+            } else {
+                return DEAD_ENEMY;
+            }
         } else if (interactive instanceof NPC) {
             return NPC;
         } else if (interactive instanceof Trap) {
