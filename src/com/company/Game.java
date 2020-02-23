@@ -39,6 +39,11 @@ public class Game {
 
     private Interactive tempInteractive;
 
+
+    boolean firstTrap = true;
+    boolean firstMonster = true;
+    boolean firstNPC = true;
+
     public Game()
     {
         rnd = new Random();
@@ -448,28 +453,33 @@ public class Game {
      * @param direction - input taken from the user
      * @return true/false depending on whether the player can move
      */
-    public boolean movePlayer(String direction)
-    {
+    public boolean movePlayer(String direction) {
         int playerX = player.getX();
         int playerY = player.getY();
 
         int sizeOfField = 1;
 
-        int newX;
-        int newY;
+        // return -1: death, 0: flee, 1: victory
+        int outcome;
+
+        int newX=0;
+        int newY=0;
 
         try {
             //up
             switch (direction) {
                 case "u":
                     if (map[playerX][playerY].canUp()) {
-                        newX = playerX;
-                        newY = playerY - sizeOfField;
+
+                            newX = playerX;
+                            newY = playerY - sizeOfField;
+
+
                     } else {
                         return false;
                     }
                     break;
-                    //left
+                //left
                 case "l":
                     if (map[playerX][playerY].canLeft()) {
                         newX = playerX - sizeOfField;
@@ -518,6 +528,15 @@ public class Game {
             //Sets new player position to have the marker of the player
             map[newX][newY].setInteractive(player);
 
+            if (tempInteractive instanceof Enemy) {
+                combat();
+            }
+            if(tempInteractive instanceof Trap)
+            {
+                if(firstTrap = true) encounterTrap1();
+
+                else gameOver();
+            }
             return true;
         } catch (ArrayIndexOutOfBoundsException e) {
 
@@ -526,4 +545,283 @@ public class Game {
         }
     }
 
+    /**
+     * Plays when you step on a trap
+     */
+    public void encounterTrap1()
+    {
+        if(firstTrap)
+        {
+            Scanner sc = new Scanner(System.in);
+            String trapInput;
+
+            System.out.println("\nClick, click. What is this sound? It comes from the eastern side. The noise is quite funny. ");
+            System.out.println("Almost... Mechanical? You wonder why there would be anything machine-like. You turn to ");
+            System.out.println("examine the source of the sound. There is an enormous rusty machine standing in your way. ");
+            System.out.println("It does not look safe nor useful. It seems impossible to walk next to it, although, if you tried ");
+            System.out.println("you might get crushed by all the moving parts. Maybe you could try and destroy it, like you do ");
+            System.out.println("with everything in your life? You can spot some gears shining in the middle of it. Could a simple ");
+            System.out.println("rock and strength of your amazing muscles solve the problem?");
+
+            boolean retry = false;
+            do {
+
+                System.out.println("\n1.\tThrow a rock at it. What could go wrong?\n" +
+                        "2.\tSqueeze next to it. How hard could it be?\n");
+
+                trapInput = sc.nextLine();
+                switch (trapInput)
+                {
+                    case"1": retry = false; continue;
+                    case "2":
+                    {
+                        System.out.println("As you tried to squeeze next to the dangerously looking machine, " +
+                                "your clothes got into the motor and your body got shattered. Good job. ");
+
+                        gameOver();
+                    }
+                    default: System.out.println("Please check your input!"); retry=true;break;
+                }
+            } while (retry);
+
+            firstTrap = false;
+            System.out.println("\nThe rock hit the gears and the rusty parts fell apart, unblocking the path.");
+            System.out.println("\nNEXT TIME YOU STEP ON A TRAP, YOU WILL BE FATALLY INJURED. BE AWARE!");
+            System.out.println("USE THE CHECK FOR TRAP OPTION TO DISABLE THEM.\n");
+
+
+            disableTrap();
+            tempInteractive = null;
+
+        }
+
+    }
+
+
+    /*
+     * Disables traps if they exist
+     * @return false/true whether there were traps to disable
+     */
+    public boolean disableTrap()
+    {
+        int playerX = player.getX();
+        int playerY = player.getY();
+
+        boolean trapExists = false;
+
+        try {
+            if(map[playerX+1][playerY].canRight())
+            {
+                if(map[playerX+1][playerY].getInteractive().equals(trap))
+                {
+                    trapExists=true;
+                    map[playerX+1][playerY].setInteractive(null);
+                    tempInteractive = null;
+
+                }
+            }
+            if(map[playerX-1][playerY].canLeft() )
+            {
+                if(map[playerX-1][playerY].getInteractive().equals(trap))
+                {
+                    trapExists=true;
+                    map[playerX-1][playerY].setInteractive(null);
+                    tempInteractive = null;
+
+                }
+            }
+            if(map[playerX][playerY-1].canUp() )
+            {
+                if(map[playerX][playerY-1].getInteractive().equals(trap))
+                {
+                    trapExists=true;
+                    map[playerX][playerY-1].setInteractive(null);
+                    tempInteractive = null;
+
+                }
+            }
+            if(map[playerX][playerY-1].canDown())
+            {
+                if(map[playerX][playerY-1].getInteractive().equals(trap))
+                {
+                    trapExists=true;
+                    map[playerX][playerY-1].setInteractive(null);
+                    tempInteractive = null;
+
+                }
+
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+
+
+
+        }
+        catch (NullPointerException e)
+        {
+
+        }
+
+
+        return trapExists;
+
+
+    }
+
+    public void showCombatOptions()
+    {
+        System.out.println("\nRegular attacks\n");
+        System.out.println("1. Try to cut through the monster’s chest. Maybe it does have a heart on the contrary to you?");
+        System.out.println("2. Attempt to cut off the monster’s legs. Legless opponent sounds like something you could fight.");
+        System.out.println("3. Throw the sword at the monster's head hoping that you aim properly and won’t lose your weapon.");
+        System.out.println("4. Pirouette/Spin while blindly flinging the blade around like a sane person you are.");
+        System.out.println("5. Just try to harm the monster with the sword somehow - you are so scared that you can barely move.\n");
+        System.out.println("Special attacks that require your will power:\n");
+        System.out.println("6. Try to tickle it to death with hands you create with the power of your mind. You brute. ");
+        System.out.println("7. Create a fireball and throw it at the monster, might make it evaporate? Or create a sculpture out of it. That might be your chance to become a creepy artist. ");
+        System.out.println("8. Try and dismember the monster’s body parts with the power of your mind to show off how almighty you are at the moment and start to wonder who the real monster is right now.");
+        System.out.println("\nRestorative options:");
+        System.out.println("9. Use a dreamcatcher to grasp your breath - Healing ability");
+        System.out.println("10. Consume a liquid light potion to restore your will power - Restoration ability");
+        System.out.println("0. Run away, like the coward you are");
+
+    }
+
+    // return -1: death, 0: flee, 1: victory
+    public int combat() {
+        System.out.println("\nYou feel like you're being watched. You might not be ready, but you must face your night terrors.");
+        Scanner s = new Scanner(System.in);
+        enemy = new Enemy();
+        String userInput;
+        String enemyInput;
+
+        //Records damage enemy and player do each turn
+        int enemyDamage = 0;
+        int playerDamage = 0;
+
+        //Retry if input is invalid
+        boolean retry;
+
+        do {
+
+            System.out.println("\nYour status:");
+            System.out.println("Your health: " + player.getHealth());
+            System.out.println("Your will power: " + player.getMana());
+            System.out.println();
+
+            enemyDamage = 0;
+            playerDamage = 0;
+
+            do {
+                System.out.println("Please choose your next move:");
+                showCombatOptions();
+
+                userInput = s.nextLine();
+                retry = false;
+
+                playerDamage = 0;
+                switch (userInput) {
+                    case "1": case "2": case "3": case"4": case"5":
+                        playerDamage = playerDamage + player.attack();
+                        break;
+                    case "6": case"7": case"8":
+                        playerDamage = playerDamage + player.specialAttack();
+                        break;
+                    case "9":
+                        player.healHP();
+                        break;
+                    case "10":
+                        player.healMP();
+                        break;
+                    case "0":
+                        player.flee();
+                        return 0;
+                    default:
+                        System.out.println("Please try again - wrong user input.");
+                        retry = true;
+                        break;
+                }
+
+            } while (retry);
+
+
+            //Enemy health is deduced after player moves
+            enemy.setHealth(enemy.getHealth() - playerDamage);
+            if (!enemy.isCharacterAlive()) break;
+
+            //Enemy has their turn
+            System.out.println("\nMonster status:");
+            System.out.println("Monster health: " + enemy.getHealth());
+            System.out.println("Monster will power: " + enemy.getMana());
+            ;
+            System.out.println();
+
+            System.out.println("\nMonster has its turn!");
+            System.out.println();
+
+            int random = (int) (Math.random() * 4 + 1);
+            enemyInput = Integer.toString(random);
+
+
+            switch (enemyInput) {
+                case "1":
+                    enemyDamage = enemyDamage + enemy.attack();
+                    break;
+                case "2":
+                    enemyDamage = enemyDamage + enemy.specialAttack();
+                    break;
+                case "3":
+                    enemy.healHP();
+                    break;
+                case "4":
+                    enemy.healMP();
+                    break;
+            }
+
+
+            //Player's health is deduced after enemy moves
+            player.setHealth(player.getHealth() - enemyDamage);
+
+
+        } while (enemy.isCharacterAlive() && player.isCharacterAlive());
+
+
+        if (!enemy.isCharacterAlive()) {
+            System.out.println("\nYou overwhelm your night terrors. You win, for now.");
+            return 1;
+
+
+        } else if (!player.isCharacterAlive()) {
+            System.out.println("\nYou have been consumed by your fear, and you never wake up again.");
+
+            gameOver();
+
+            // implement game over
+            return -1;
+        }
+
+        return -1;
+
+    }
+
+    public void gameOver()
+    {
+        System.out.println("\n    You Died\n" +
+                "           _____   _____\n" +
+                "          /     \\ /     \\\n" +
+                "     ,   |       '       |\n" +
+                "     I __L________       L__\n" +
+                "O====IE__________/     ./___>\n" +
+                "     I      \\.       ./\n" +
+                "     `        \\.   ./\n" +
+                "                \\ /\n" +
+                "                 '\n");
+
+
+        System.out.println("Good luck next time!");
+        System.exit(1);
+
+    }
+
+
 }
+

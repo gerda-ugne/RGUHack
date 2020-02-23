@@ -12,6 +12,7 @@ public class Player extends Character {
     {
         super();
         oil = 100;
+        getInv().addToInventory("Rock");
     }
 
 
@@ -23,7 +24,6 @@ public class Player extends Character {
     {
         Random rand = new Random();
         int damage = rand.nextInt(20);
-        System.out.println("You pinch the human with your beak!");
         System.out.println("You have inflicted " + damage + " points of damage.");
 
         return damage;
@@ -40,12 +40,11 @@ public class Player extends Character {
         Random rand = new Random();
         if(getMana() < 40)
         {
-            System.out.println("You don't have enough energy to cast the special attack! You rest.");
+            System.out.println("You don't have enough will power to cast the special attack! You rest.");
             return 0;
         }
 
         int damage = rand.nextInt(50);
-        System.out.println("You furiously flap your wings at the human, inflicting serious damage!");
         System.out.println("You have inflicted " + damage + " points of damage.");
         setMana(getMana() - 40);
 
@@ -67,7 +66,7 @@ public class Player extends Character {
         {
             int HPPoints = 40;
 
-            System.out.println("You had a worm with a crunchy rock. You feel restored!");
+            System.out.println("You use a dreamcatcher. You feel restored!");
             System.out.println("You have gained " + HPPoints + " health points.");
 
             setHealth(getHealth() + HPPoints);
@@ -75,7 +74,7 @@ public class Player extends Character {
         }
         else
         {
-            System.out.println("You do not have any snacks left! You rest.");
+            System.out.println("You do not have any dreamcatchers left! You pass your turn.");
         }
 
     }
@@ -95,8 +94,8 @@ public class Player extends Character {
         {
             int MPPoints = 50;
 
-            System.out.println("You have used your wax for a power up!");
-            System.out.println("You have gained " + MPPoints + " mana points.");
+            System.out.println("You have used a liquid light potion to restore your will power.");
+            System.out.println("You have gained " + MPPoints + " will power points.");
 
             setMana(getMana() + MPPoints);
             if(getMana() > 100) setMana(100);
@@ -104,7 +103,7 @@ public class Player extends Character {
         }
         else
         {
-            System.out.println("You do not have any wax left! You rest.");
+            System.out.println("You do not have any potions left! You rest.");
         }
     }
 
@@ -135,17 +134,5 @@ public class Player extends Character {
         System.out.println("You've chosen to flee your nightmares.");
     }
 
-    public boolean checkForTrap()
-    {
-        boolean hasRock = getInv().findInInventory("Rock");
-        if(hasRock)
-        {
 
-        }
-        else
-        {
-            System.out.println("You don't have enough rocks to perform this action.");
-        }
-        return true;
-    }
 }

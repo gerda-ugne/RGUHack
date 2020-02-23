@@ -40,7 +40,14 @@ public class Menu
 
             switch(input)
             {
-                case "1": gameMenu(); break;
+                case "1":
+                {
+                    System.out.println("\nYou open your eyes. It is not your room anymore. You are outside, surrounded by hedges and a complete darkness.");
+                    System.out.println("The only source of light is an oil lamp that lies in front of you. You get up and take it.");
+
+                    game.displayMap();
+                    gameMenu();
+                } break;
                 case "2": loadGame(); break;
                 case "0": System.out.println("Thank you for playing! See you soon."); System.exit(1);
                 default: System.out.println("Your input is invalid! Please enter an integer from 0 to 2.");
@@ -59,7 +66,7 @@ public class Menu
 
         do {
 
-            System.out.println("Please choose one of the following options:");
+            System.out.println("\nPlease choose one of the following options:");
             System.out.println("1. Make a move");
             System.out.println("2. Save the game progress");
             System.out.println("3. Check your health status");
@@ -83,12 +90,12 @@ public class Menu
                         game.displayMap();
                         System.out.println("\nChoose your direction of floating:");
 
-                        System.out.println("u to go up");
-                        System.out.println("d to go down");
-                        System.out.println("l to go left");
-                        System.out.println("r to go right");
+                        System.out.println("u   - to go up");
+                        System.out.println("d   - to go down");
+                        System.out.println("l   - to go left");
+                        System.out.println("r   - to go right");
 
-                        System.out.println("enter 0 to return");
+                        System.out.println("0   - to return");
 
                         choice = s.nextLine();
                         if(choice.equals("0")) break;
@@ -123,8 +130,37 @@ public class Menu
                    game.getPlayer().getInv().showInventory();break;
                }
 
+                case "5":
+                {
+
+
+                    boolean hasRock = game.getPlayer().getInv().findInInventory("Rock");
+                    boolean trapExists = false;
+                    if(hasRock)
+                    {
+                        game.disableTrap();
+                        trapExists = game.getPlayer().getInv().remove("Rock");
+
+                        if(trapExists)
+                        {
+                            System.out.println("Good job! You have successfully disabled a deadly trap.");
+
+                        }
+                        else
+                        {
+                            System.out.println("There were no traps found. However, you have wasted your rock.");
+                        }
+
+                    }
+                    else
+                    {
+                        System.out.println("You don't have enough rocks to perform this action.");
+                    }
+                    break;
+                }
+
                 case "0": System.out.println("Thank you for playing! See you soon."); System.exit(1);
-                default: System.out.println("Your input is invalid! Please enter an integer from 0 to 2.");
+                default: System.out.println("Your input is invalid! Please enter an integer from 0 to 5.");
             }
 
 
