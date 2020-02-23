@@ -64,6 +64,7 @@ public class Menu
             System.out.println("2. Save the game progress");
             System.out.println("3. Check your health status");
             System.out.println("4. Check your inventory");
+            System.out.println("5. Check for traps");
             System.out.println("0. Exit the game");
 
             input = s.nextLine();
@@ -72,7 +73,7 @@ public class Menu
             {
                 case "1":
                 {
-                    boolean canMove;
+                    boolean canMove = false;
                     Scanner sc = new Scanner(System.in);
                     String choice;
 
@@ -89,9 +90,9 @@ public class Menu
 
                         System.out.println("enter 0 to return");
 
-                        input = s.nextLine();
-                        if(input.equals("0")) return;
-                        canMove = game.movePlayer(input);
+                        choice = s.nextLine();
+                        if(choice.equals("0")) break;
+                        canMove = game.movePlayer(choice);
 
                         if(canMove)
                         {
@@ -105,10 +106,23 @@ public class Menu
 
                     } while (!canMove);
 
-                } break;
+                    break;
+                }
 //                case "2": saveGame(); break;
-//                case "3": checkStatus(); break;
-//                case "4": showInventory();break;
+                 case "3":
+                 {
+                     System.out.println("You closely focus on your heartbeat.\n");
+                     System.out.println("Your status:");
+
+                    game.getPlayer().checkStatus();
+                    break;
+                 }
+               case "4":
+               {
+                   System.out.println("/n Here is your inventory. Defeat your nightmares or trade to acquire more items.\n");
+                   game.getPlayer().getInv().showInventory();break;
+               }
+
                 case "0": System.out.println("Thank you for playing! See you soon."); System.exit(1);
                 default: System.out.println("Your input is invalid! Please enter an integer from 0 to 2.");
             }

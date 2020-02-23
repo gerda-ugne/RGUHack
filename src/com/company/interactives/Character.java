@@ -66,6 +66,14 @@ public abstract class Character extends Position implements Interactive {
         return getHealth() > 0;
     }
 
+
+    public void checkStatus(){
+
+        System.out.println("Health:  " + health);
+        System.out.println("Mana:  " + mana);
+
+    }
+
     public abstract int attack();
 
     public abstract int specialAttack();
