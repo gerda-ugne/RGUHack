@@ -9,16 +9,15 @@ import java.util.function.Predicate;
 
 public class Game {
 
-    private static final String VERTICAL_WALL = "|";
-    private static final String HORIZONTAL_WALL = "---";
-    private static final String EMPTY_FIELD = "   ";
-    private static final String NO_WALL = " ";
-    private static final String PLAYER = " P ";
-    private static final String ENEMY = " M ";
-    private static final String DEAD_ENEMY = " X ";
-    private static final String EXIT = " E ";
-    private static final String NPC = " N ";
-    private static final String TRAP = " T ";
+    private static final String[] VERTICAL_WALL = new String[] {"|", "|", "|"};
+    private static final String HORIZONTAL_WALL = "-----";
+    private static final String[] EMPTY_FIELD = new String[] { "     ", "     ", "     "};
+    private static final String[] NO_WALL = new String[] { " ", " ", " "};
+    private static final String[] PLAYER = new String[] { "  @  ", " (^) ", " / \\ "};
+    private static final String[] ENEMY = new String[] { " ]_[ ", " -.- ", "  W  "};
+    private static final String[] DEAD_ENEMY = new String[] { " x x ", "  ^  " ,  " ^^^ "};
+    private static final String[] NPC = new String[] { "  $  ", " $$$ ", "  $  "};
+    private static final String[] TRAP = new String[] { "     ", " ^^^ ", "     "};
 
     private static final int ENEMIES_PERCENT = 12;
     private static final int NPCS_PERCENT = 6;
@@ -157,13 +156,11 @@ public class Game {
                         j,
                         Math.min(j + 2, height)
                 );
-                displayMap();
             }
         }
         while (enemyNum + npcNum + trapNum > 0) {
             placeInteractive(0, width, 0, height);
         }
-        displayMap();
     }
 
     private void placeInteractive(int xMin, int xMax, int yMin, int yMax) {
@@ -244,31 +241,40 @@ public class Game {
     }
 
     private void displayDataRow(int row) {
-        for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
-            Field field;
-            try {
-                field = map[i][row];
-                System.out.print((field.canLeft() ? NO_WALL : VERTICAL_WALL) + getInteractiveChar(field.getInteractive()));
-                if (i == player.getX() + viewDistance || i == width - 1) {
-                    System.out.print((field.canRight() ? NO_WALL : VERTICAL_WALL));
+        for (int j = 0; j < 3; j++) {
+            String line = "";
+            for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
+                Field field;
+                String[] side;
+                String[] middle;
+                try {
+                    field = map[i][row];
+                    side = field.canLeft() ? NO_WALL : VERTICAL_WALL;
+                    middle = getInteractiveChar(field.getInteractive());
+                    line = line.concat(side[j] + middle[j]);
+                    if (i == player.getX() + viewDistance || i == width - 1) {
+                        line = line.concat(field.canRight() ? NO_WALL[j] : VERTICAL_WALL[j]);
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    line = line.concat(NO_WALL[j] + EMPTY_FIELD[j]);
                 }
-            } catch (IndexOutOfBoundsException e) {
-                System.out.print(NO_WALL + EMPTY_FIELD);
             }
+            System.out.println(line);
         }
-        System.out.println();
     }
 
     private void displayRowUpperBorders(int row) {
         for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
             try {
                 Field field = map[i][row];
-                System.out.print(VERTICAL_WALL + (field.canUp() ? EMPTY_FIELD : HORIZONTAL_WALL));
+                String side = VERTICAL_WALL[1];
+                String middle = field.canUp() ? EMPTY_FIELD[1] : HORIZONTAL_WALL;
+                System.out.print(side + middle);
                 if (i == player.getX() + viewDistance || i == width - 1) {
-                    System.out.print(VERTICAL_WALL);
+                    System.out.print(VERTICAL_WALL[1]);
                 }
             } catch (IndexOutOfBoundsException e) {
-                System.out.print(NO_WALL + EMPTY_FIELD);
+                System.out.print(NO_WALL[1] + EMPTY_FIELD[1]);
             }
         }
         System.out.println();
@@ -278,18 +284,20 @@ public class Game {
         for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
             try {
                 Field field = map[i][row];
-                System.out.print(VERTICAL_WALL + (field.canDown() ? EMPTY_FIELD : HORIZONTAL_WALL));
+                String side = VERTICAL_WALL[1];
+                String middle = field.canDown() ? EMPTY_FIELD[1] : HORIZONTAL_WALL;
+                System.out.print(side + middle);
                 if (i == player.getX() + viewDistance || i == width - 1) {
-                    System.out.print(VERTICAL_WALL);
+                    System.out.print(VERTICAL_WALL[1]);
                 }
             } catch (IndexOutOfBoundsException e) {
-                System.out.print(NO_WALL + EMPTY_FIELD);
+                System.out.print(NO_WALL[1] + EMPTY_FIELD[1]);
             }
         }
         System.out.println();
     }
 
-    private String getInteractiveChar(Interactive interactive) {
+    private String[] getInteractiveChar(Interactive interactive) {
         if (interactive instanceof Player) {
             return PLAYER;
         } else if (interactive instanceof Enemy) {

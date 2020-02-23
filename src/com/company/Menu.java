@@ -23,6 +23,8 @@ public class Menu
     public void introduction()
     {
         //Insert introduction and ascii art here
+        System.out.println();
+        System.out.println();
         System.out.println("`" +
                 " MMMMMMMb.                                                                           `MM                 \n" +
                 " MM    `Mb                                                                            MM                 \n" +
@@ -60,8 +62,8 @@ public class Menu
             {
                 case "1":
                 {
-                    typeSlow("\nYou open your eyes. It is not your room anymore. You are outside, surrounded by hedges and a complete darkness.");
-                    typeSlow("The only source of light is an oil lamp that lies in front of you. You get up and take it.\n");
+                    typeSlow("\nYou open your eyes. It is not your room anymore. You are outside, surrounded by hedges and a complete darkness.\n" +
+                            "The only source of light is an oil lamp that lies in front of you. You get up and take it.\n");
 
                     game.displayMap();
                     gameMenu();
@@ -142,7 +144,9 @@ public class Menu
 
                     break;
                 }
-//                case "2": saveGame(); break;
+                case "2":
+                    saveGame();
+                    break;
                  case "3":
                  {
                      System.out.println("You closely focus on your heartbeat.\n");
