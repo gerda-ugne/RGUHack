@@ -33,9 +33,6 @@ public class Game {
     private Field[][] map;
 
     private Player player;
-    private Enemy enemy;
-    private NPC npc;
-    private Trap trap;
 
     private Interactive tempInteractive;
 
@@ -53,7 +50,6 @@ public class Game {
         viewDistance = 8;
 
         player = new Player();
-        npc = new NPC();
         tempInteractive = null;
 
         player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
@@ -293,18 +289,10 @@ public class Game {
         return player;
     }
 
-    public Enemy getEnemy() {
-        return enemy;
-    }
-
-    public NPC getNpc() {
-        return npc;
-    }
-
     /**
      * Displays the trade log when the player encounters a NPC and chooses the trade option.
      */
-    public void showTradeLog() {
+    public void showTradeLog(NPC npc) {
         System.out.println("You have opened the trade log. You can buy valuable items that will aid you in your journey");
         System.out.println("You can also sell items from your inventory. However, note that you cannot re-buy them.\n");
 
@@ -334,10 +322,10 @@ public class Game {
 
             switch (input) {
                 case "1":
-                    buyItems();
+                    buyItems(npc);
                     break;
                 case "2":
-                    sellItems();
+                    sellItems(npc);
                     break;
                 case "0":
                     System.out.println("You have opted to return to your adventure.");
@@ -353,7 +341,7 @@ public class Game {
     /**
      * Method for selling items. This option is selected from the trade log.
      */
-    public void sellItems() {
+    public void sellItems(NPC npc) {
 
         do {
 
@@ -404,7 +392,7 @@ public class Game {
     /**
      * Method for buying items. This option is accessible from the trade log.
      */
-    public void buyItems()
+    public void buyItems(NPC npc)
     {
         do {
             System.out.println("\nPlease state what item you want to buy, or enter 'return' to return:");
@@ -547,13 +535,13 @@ public class Game {
             }
             if(tempInteractive instanceof NPC)
             {
-                if(firstNPC) interaction1();
+                if(firstNPC) interaction1(newX, newY);
                 else
                 {
                     System.out.println("\tHello, wanderer. I hope you are well, although, by looking at you I can assume that you have " +
                             "\nencountered some of this place’s nightmarish creations. But you are alive! Should not be that gloomy," +
                             " \nenjoy your life as long as you can. In the meantime, would you like to buy anything?");
-                    npcInteract();
+                    npcInteract(newX, newY);
                 }
 
             }
@@ -568,7 +556,7 @@ public class Game {
     /**
      * first npc interaction
      */
-    private void interaction1() {
+    private void interaction1(int x, int y) {
 
         System.out.println("\nAfter a while you notice a silhouette in front of you. Hopefully it is someone that could tell you anything about this odd place." +
                 " \nShouldn’t assume anything negative, even if they look super creepy, right?\n" +
@@ -578,12 +566,14 @@ public class Game {
                 " \ncause the creatures that live in here might want to feed on you when it goes off. Don’t worry though. Just remember to add some" +
                 " \noil when you find it. If you’d like to, I can sell you some.' \n");
 
-        npcInteract();
+        npcInteract(x, y);
         firstNPC = false;
     }
 
-    private void npcInteract()
+    private void npcInteract(int x, int y)
     {
+        NPC npc = (NPC) tempInteractive;
+
         Scanner sc = new Scanner(System.in);
         npc.getInv().resetInventory();
         npc.getInv().addToInventory("Oil");
@@ -603,7 +593,7 @@ public class Game {
         choice = sc.nextLine();
         switch(choice)
         {
-            case "1": showTradeLog();
+            case "1": showTradeLog(npc);
             case "2": return;
             case "3":
             {
@@ -701,7 +691,7 @@ public class Game {
         try {
             if(map[playerX+1][playerY].canRight())
             {
-                if(map[playerX+1][playerY].getInteractive().equals(trap))
+                if(map[playerX+1][playerY].getInteractive() instanceof Trap)
                 {
                     trapExists=true;
                     map[playerX+1][playerY].setInteractive(null);
@@ -711,7 +701,7 @@ public class Game {
             }
             if(map[playerX-1][playerY].canLeft() )
             {
-                if(map[playerX-1][playerY].getInteractive().equals(trap))
+                if(map[playerX-1][playerY].getInteractive() instanceof Trap)
                 {
                     trapExists=true;
                     map[playerX-1][playerY].setInteractive(null);
@@ -721,7 +711,7 @@ public class Game {
             }
             if(map[playerX][playerY-1].canUp() )
             {
-                if(map[playerX][playerY-1].getInteractive().equals(trap))
+                if(map[playerX][playerY-1].getInteractive() instanceof Trap)
                 {
                     trapExists=true;
                     map[playerX][playerY-1].setInteractive(null);
@@ -731,7 +721,7 @@ public class Game {
             }
             if(map[playerX][playerY-1].canDown())
             {
-                if(map[playerX][playerY-1].getInteractive().equals(trap))
+                if(map[playerX][playerY-1].getInteractive() instanceof Trap)
                 {
                     trapExists=true;
                     map[playerX][playerY-1].setInteractive(null);
@@ -770,7 +760,7 @@ public class Game {
     public int combat(int x, int y) {
         System.out.println("\nYou feel like you're being watched. You might not be ready, but you must face your night terrors.");
         Scanner s = new Scanner(System.in);
-        enemy = (Enemy) tempInteractive;
+        Enemy enemy = (Enemy) tempInteractive;
         String userInput;
         String enemyInput;
 
