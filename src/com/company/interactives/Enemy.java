@@ -19,8 +19,8 @@ public class Enemy extends Character {
         Random rand = new Random();
 
         int damage = rand.nextInt(20);
-        System.out.println("Human has thrown a plastic bag at you!");
-        System.out.println("Human has inflicted " + damage + " points of damage.");
+        System.out.println("Monster has violently slammed you.");
+        System.out.println("Monster has inflicted " + damage + " points of damage.");
 
         return damage;
 
@@ -37,12 +37,12 @@ public class Enemy extends Character {
         Random rand = new Random();
         if (getMana() < 40)
         {
-            System.out.println("Human does not have enough energy to cast a special attack. They rest.");
+            System.out.println("Monster has ran out of focus to continue their attack for this turn.");
             return 0;
         }
         int damage = rand.nextInt(40);
-        System.out.println("Human has thrown a plastic bottle at you!");
-        System.out.println("Human has inflicted " + damage + " points of damage.");
+        System.out.println("Monster reveals your darkest nightmares.");
+        System.out.println("Monster has inflicted " + damage + " points of damage.");
 
         setMana(getMana() - 40);
 
@@ -59,8 +59,8 @@ public class Enemy extends Character {
     {
         int HPPoints = 7;
 
-        System.out.println("Human has a snack to restore their health!");
-        System.out.println("Human has gained " + HPPoints + " health points.");
+        System.out.println("Monster absorbs the darkness of the void, recovering health.");
+        System.out.println("Monster has gained " + HPPoints + " health points.");
 
         setHealth(getHealth() + HPPoints);
         if(getHealth() >100) setHealth(100);
@@ -75,8 +75,8 @@ public class Enemy extends Character {
     {
         int MPPoints = 10;
 
-        System.out.println("Human has an energy drink!");
-        System.out.println("Human has gained " + MPPoints + " mana points.");
+        System.out.println("Monster screams in anguish, replenishing its super powers.");
+        System.out.println("Monster has gained " + MPPoints + " focus points.");
 
         setMana(getMana() + MPPoints);
         if(getMana() >100) setMana(100);

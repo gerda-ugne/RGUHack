@@ -189,7 +189,6 @@ public class Game {
         if (interactive instanceof Enemy) enemyNum--;
         else if (interactive instanceof NPC) npcNum--;
         else if (interactive instanceof Trap) trapNum--;
-        displayMap();
     }
 
     private boolean isPlacementAllowed(Interactive interactive, int x, int y) {
