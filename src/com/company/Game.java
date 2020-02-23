@@ -536,7 +536,7 @@ public class Game {
             map[newX][newY].setInteractive(player);
 
             if (tempInteractive instanceof Enemy) {
-                combat();
+                combat(newX, newY);
             }
             if(tempInteractive instanceof Trap)
             {
@@ -694,10 +694,10 @@ public class Game {
     }
 
     // return -1: death, 0: flee, 1: victory
-    public int combat() {
+    public int combat(int x, int y) {
         System.out.println("\nYou feel like you're being watched. You might not be ready, but you must face your night terrors.");
         Scanner s = new Scanner(System.in);
-        enemy = new Enemy();
+        enemy = (Enemy) tempInteractive;
         String userInput;
         String enemyInput;
 
