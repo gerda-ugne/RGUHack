@@ -543,10 +543,10 @@ public class Game {
             //Sets new player position to have the marker of the player
             map[newX][newY].setInteractive(player);
 
-            Enemy respawn = null;
+            Enemy deadEnemy = null;
             if (tempInteractive instanceof Enemy && ((Enemy) tempInteractive).isCharacterAlive()) {
                 // Add enemy to respawn queue if dead
-                respawn = combat(newX, newY) == 1 ? (Enemy) tempInteractive : null;
+                deadEnemy = combat(newX, newY) == 1 ? (Enemy) tempInteractive : null;
             }
             if(tempInteractive instanceof Trap)
             {
@@ -566,6 +566,8 @@ public class Game {
                 }
 
             }
+            // Add the enemy which dead this turn (or null)
+            respawnQueue.add(deadEnemy);
             // respawn the enemies dead for 5 turns or do nothing
             Enemy resurrect = respawnQueue.remove();
             if (resurrect != null) resurrect.setHealth(Character.MAX_HEALTH);
