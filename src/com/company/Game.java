@@ -57,7 +57,7 @@ public class Game {
         respawnQueue.add(null);
         respawnQueue.add(null);
 
-        player = new Player(width * height);
+        player = new Player(width * height / 2);
         tempInteractive = null;
 
         player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
