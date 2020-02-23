@@ -63,7 +63,7 @@ public class Player extends Character {
     public void healHP()
     {
         boolean itemFound = false;
-        itemFound = getInv().remove("HP_POTION");
+        itemFound = getInv().remove("Dreamcatcher");
 
         if(itemFound == true)
         {
@@ -90,7 +90,7 @@ public class Player extends Character {
     public void healMP()
     {
         boolean itemFound = false;
-        itemFound = getInv().remove("MP_Potion");
+        itemFound = getInv().remove("Liquid light");
 
 
         if(itemFound == true)
