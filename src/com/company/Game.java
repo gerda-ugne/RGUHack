@@ -53,6 +53,7 @@ public class Game {
         viewDistance = 8;
 
         player = new Player();
+        npc = new NPC();
         tempInteractive = null;
 
         player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
@@ -544,11 +545,92 @@ public class Game {
 
                 else gameOver();
             }
+            if(tempInteractive instanceof NPC)
+            {
+                if(firstNPC) interaction1();
+                else
+                {
+                    System.out.println("\tHello, wanderer. I hope you are well, although, by looking at you I can assume that you have " +
+                            "\nencountered some of this place’s nightmarish creations. But you are alive! Should not be that gloomy," +
+                            " \nenjoy your life as long as you can. In the meantime, would you like to buy anything?");
+                    npcInteract();
+                }
+
+            }
             return true;
         } catch (ArrayIndexOutOfBoundsException e) {
 
             //If out of boundaries cannot move
             return false;
+        }
+    }
+
+    /**
+     * first npc interaction
+     */
+    private void interaction1() {
+
+        System.out.println("\nAfter a while you notice a silhouette in front of you. Hopefully it is someone that could tell you anything about this odd place." +
+                " \nShouldn’t assume anything negative, even if they look super creepy, right?\n" +
+
+                "\n'Oh, so you were what I assumed was a firefly. How do you find yourself in this peculiar place? Mh, you are not really talkative, " +
+                "\nare you? Well, then. Welcome to Dream Realm. As you have already noticed, it is really dark. You might want to keep that lamp on," +
+                " \ncause the creatures that live in here might want to feed on you when it goes off. Don’t worry though. Just remember to add some" +
+                " \noil when you find it. If you’d like to, I can sell you some.' \n");
+
+        npcInteract();
+        firstNPC = false;
+    }
+
+    private void npcInteract()
+    {
+        Scanner sc = new Scanner(System.in);
+        npc.getInv().resetInventory();
+        npc.getInv().addToInventory("Oil");
+        npc.getInv().addToInventory("Oil");
+        npc.getInv().addToInventory("Rock");
+        npc.getInv().addToInventory("Rock");
+        npc.getInv().addToInventory("Liquid light");
+        npc.getInv().addToInventory("Liquid light");
+        npc.getInv().addToInventory("Dreamcatcher");
+        npc.getInv().addToInventory("Dreamcatcher");
+        String choice, choice2;
+
+        System.out.println("\n" +
+                "1.\tTrade\n" +
+                "2.\tLeave\n" +
+                "3.\tCan I ask you something?");
+        choice = sc.nextLine();
+        switch(choice)
+        {
+            case "1": showTradeLog();
+            case "2": return;
+            case "3":
+            {
+               boolean retry = true;
+                do {
+                    retry = true;
+
+                    System.out.println("a.	What is this place?");
+                    System.out.println("b.  How do I get out of here?");
+                    System.out.println("c.  What kind of creatures can I encounter here?");
+                    System.out.println("0.  Return");
+
+                    choice2 = sc.nextLine();
+
+                    switch(choice2)
+                    {
+                        case "a": System.out.println("'I do not think I can give you the exact answer. " +
+                                "It is incredibly bizarre, and thus, I think it cannot be defined. '");break;
+                        case"b": System.out.println("'You need to find your own way. Although, you might want to try and ask the others.' ");break;
+                        case"c": System.out.println("'Even though they have bodies, they are like nightmares. They will feed on your body and soul. " +
+                                "If you try and kill them, they may once again appear and hunt you.'");break;
+                        case"0": retry = false; continue;
+                        default: System.out.println("Invalid input. Try again!"); retry = true; break;
+                    }
+
+                } while (retry);
+            }
         }
     }
 
@@ -794,6 +876,10 @@ public class Game {
 
         if (!enemy.isCharacterAlive()) {
             System.out.println("\nYou overwhelm your night terrors. You win, for now.");
+
+            player.getInv().addToInventory("Rock");
+            player.addOil(30);
+
             return 1;
 
 

@@ -18,7 +18,7 @@ public class Item {
     }
     public void showItemInformation()
     {
-        System.out.println( itemName+ ". Its price is " + price);
+        System.out.println( itemName+ ". Its price is " + price + ".");
     }
 
 
