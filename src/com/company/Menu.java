@@ -233,6 +233,8 @@ public class Menu
         }
 
         System.out.println();
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
     }
 
     public void typeSlowest(String text)
