@@ -4,6 +4,10 @@ import com.company.Inventory;
 
 public abstract class Character extends Interactive {
 
+    public static final int MAX_HEALTH = 100;
+    public static final int MAX_MANA = 100;
+    public static final int MAX_CURRENCY = 100;
+
     protected boolean visible;
     private int health;
     public int mana;
@@ -13,9 +17,9 @@ public abstract class Character extends Interactive {
 
     public Character(){
 
-        health = 100;
-        mana = 100;
-        currency = 100;
+        health = MAX_HEALTH;
+        mana = MAX_MANA;
+        currency = MAX_CURRENCY;
 
     }
 
