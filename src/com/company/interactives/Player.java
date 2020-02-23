@@ -6,13 +6,14 @@ import java.util.Random;
 
 public class Player extends Character {
 
-    private static final int MAX_OIL = 100;
+    public final int MAX_OIL;
 
     private int oil;
 
-    public Player()
+    public Player(int maxOil)
     {
         super();
+        MAX_OIL = maxOil;
         oil = 100;
         getInv().addToInventory("Rock");
     }
