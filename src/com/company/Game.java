@@ -885,9 +885,15 @@ public class Game {
         if (!enemy.isCharacterAlive()) {
             System.out.println("\nYou overwhelm your night terrors. You win, for now.");
 
-            // TODO randomize loot
-            player.getInv().addToInventory("Rock");
-            player.addOil(30);
+            int chance = rnd.nextInt(100);
+            if (chance < 15) {
+                player.getInv().addToInventory("Liquid light");
+            } else if (chance < 35) {
+                player.getInv().addToInventory("Dreamcathcer");
+            } else {
+                player.getInv().addToInventory("Rock");
+            }
+            player.addOil(20);
 
             return 1;
 
