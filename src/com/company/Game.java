@@ -879,7 +879,7 @@ public class Game {
 
     public void gameOver()
     {
-        System.out.println("\n    You Died\n" +
+        System.out.println("\n  You Died.\n" +
                 "           _____   _____\n" +
                 "          /     \\ /     \\\n" +
                 "     ,   |       '       |\n" +
@@ -891,6 +891,7 @@ public class Game {
                 "                 '\n");
 
 
+        System.out.println("Unfortunately, you never wake up again...");
         System.out.println("Good luck next time!");
         System.exit(1);
 

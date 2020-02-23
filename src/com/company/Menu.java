@@ -23,14 +23,32 @@ public class Menu
     public void introduction()
     {
         //Insert introduction and ascii art here
+        System.out.println("`" +
+                " MMMMMMMb.                                                                           `MM                 \n" +
+                " MM    `Mb                                                                            MM                 \n" +
+                " MM     MM ___  __   ____      ___   ___  __    __         ___  __   ____      ___    MM ___  __    __   \n" +
+                " MM     MM `MM 6MM  6MMMMb   6MMMMb  `MM 6MMb  6MMb        `MM 6MM  6MMMMb   6MMMMb   MM `MM 6MMb  6MMb  \n" +
+                " MM     MM  MM69 \" 6M'  `Mb 8M'  `Mb  MM69 `MM69 `Mb        MM69 \" 6M'  `Mb 8M'  `Mb  MM  MM69 `MM69 `Mb \n" +
+                " MM     MM  MM'    MM    MM     ,oMM  MM'   MM'   MM        MM'    MM    MM     ,oMM  MM  MM'   MM'   MM \n" +
+                " MM     MM  MM     MMMMMMMM ,6MM9'MM  MM    MM    MM        MM     MMMMMMMM ,6MM9'MM  MM  MM    MM    MM \n" +
+                " MM     MM  MM     MM       MM'   MM  MM    MM    MM        MM     MM       MM'   MM  MM  MM    MM    MM \n" +
+                " MM    .M9  MM     YM    d9 MM.  ,MM  MM    MM    MM        MM     YM    d9 MM.  ,MM  MM  MM    MM    MM \n" +
+                "_MMMMMMM9' _MM_     YMMMM9  `YMMM9'Yb_MM_  _MM_  _MM_      _MM_     YMMMM9  `YMMM9'Yb_MM__MM_  _MM_  _MM_\n" +
+                "                                                                                                         \n" +
+                "                                                                                                         \n" +
+                "                                                                                                         ");
+        typeSlowest("\nThere is nothing better than a long, careless sleep. So this is what you do - you are asleep." +
+                "\nYou are in an amazing place, full of wonders. Lost in the dreamland. But how do you get out of there?" +
+                "\nYou cannot stay there forever. You need to wake up, but you find yourself lost. Find the exit. Escape," +
+                "\nbefore it's too late.");
 
-        System.out.println("You've entered the dream realm.");
+        typeSlow("\nYou've entered the dream realm.");
         Scanner s = new Scanner (System.in);
         String input;
 
         do {
 
-            System.out.println("Please choose one of the following options:");
+            System.out.println("\n\nPlease choose one of the following options:");
             System.out.println("1. Start a new game");
             System.out.println("2. Load a saved game");
             System.out.println("3. Display a game guide");
@@ -42,8 +60,8 @@ public class Menu
             {
                 case "1":
                 {
-                    System.out.println("\nYou open your eyes. It is not your room anymore. You are outside, surrounded by hedges and a complete darkness.");
-                    System.out.println("The only source of light is an oil lamp that lies in front of you. You get up and take it.");
+                    typeSlow("\nYou open your eyes. It is not your room anymore. You are outside, surrounded by hedges and a complete darkness.");
+                    typeSlow("The only source of light is an oil lamp that lies in front of you. You get up and take it.\n");
 
                     game.displayMap();
                     gameMenu();
@@ -100,7 +118,7 @@ public class Menu
                         System.out.println("l   - to go left");
                         System.out.println("r   - to go right");
 
-                        System.out.println("\n Each turn consumes oil. You have " + game.getPlayer().getOil() +" oil left. Make sure it " +
+                        System.out.println("\nEach turn consumes oil. You have " + game.getPlayer().getOil() +" oil left. Make sure it " +
                                 "doesn't run out, otherwise the nightmares might end you.");
 
                         System.out.println("0   - to return");
@@ -198,6 +216,44 @@ public class Menu
     public void loadGame()
     {
 
+    }
+
+    public void typeSlow(String text)
+    {
+        String[] txt = text.split("");
+
+        for (String aTxt : txt)
+        {
+            System.out.print(aTxt);
+            sleepMe(7);
+        }
+
+        System.out.println();
+    }
+
+    public void typeSlowest(String text)
+    {
+        String[] txt = text.split("");
+
+        for (String aTxt : txt)
+        {
+            System.out.print(aTxt);
+            sleepMe(15);
+        }
+
+        System.out.println();
+    }
+
+    public void sleepMe(int time)
+    {
+        try
+        {
+            Thread.sleep(time);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 
 
