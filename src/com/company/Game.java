@@ -3,7 +3,8 @@ package com.company;
 import com.company.interactives.*;
 import com.company.map.Field;
 
-import java.util.Scanner;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class Game {
 
@@ -17,114 +18,164 @@ public class Game {
     private static final String NPC = " N ";
     private static final String TRAP = " T ";
 
+    private Random rnd;
+
+    private int width;
+    private int height;
+
+    private int viewDistance;
+
     private Player player;
     private Enemy enemy;
     private NPC npc;
     private Trap trap;
 
-    private int width;
-    private int height;
-
     private Field[][] map;
 
     public Game()
     {
+        width = 10;
+        height = 10;
+
+        viewDistance = 11;
+
+        rnd = new Random();
         player = new Player();
-        player.setPosition(2, 2);
+        player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
+//        player.setPosition(2, 2);
         enemy = new Enemy();
         npc = new NPC();
-        trap = new Trap();
 
-        width = 5;
-        height = 5;
+        trap = new Trap();
 
         map = new Field[width][height];
         createMap();
+        map[player.getX()][player.getY()].setInteractive(player);
     }
 
     private void createMap() {
-        map[0][0] = new Field(false, true, false, false);
-        map[1][0] = new Field(false, true, false, true);
-        map[2][0] = new Field(false, true, true, false);
-        map[3][0] = new Field(false, true, false, false, npc);
-        map[4][0] = new Field(true, true, false, false);
-        map[0][1] = new Field(true, true, false, true);
-        map[1][1] = new Field(true, false, true, true, trap);
-        map[2][1] = new Field(true, true, true, false);
-        map[3][1] = new Field(true, false, false, true);
-        map[4][1] = new Field(true, true, true, true, trap);
-        map[0][2] = new Field(true, false, false, true);
-        map[1][2] = new Field(true, true, true, false, npc);
-        map[2][2] = new Field(true, true, false, true);
-        map[3][2] = new Field(false, true, true, true, enemy);
-        map[4][2] = new Field(true, false, true, false);
-        map[0][3] = new Field(false, true, false, true);
-        map[1][3] = new Field(true, true, true, false);
-        map[2][3] = new Field(true, true, false, false);
-        map[3][3] = new Field(true, false, false, true);
-        map[4][3] = new Field(false, true, true, false);
-        map[0][4] = new Field(true, false, false, true, player);
-        map[1][4] = new Field(true, false, true, false);
-        map[2][4] = new Field(true, false, false, true, enemy);
-        map[3][4] = new Field(false, false, true, true);
-        map[4][4] = new Field(true, false, true, false);
+        Set<Field> in = new HashSet<>(width * height);
+        List<Field> neighbors = new ArrayList<>(width * height / 2);
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                Field field = new Field();
+                map[i][j] = field;
+                field.setPosition(i, j);
+            }
+        }
+
+        int x = player.getX();
+        int y = player.getY();
+        Field newIn = map[x][y];
+        in.add(newIn);
+        do {
+            List<Field> nexts = new ArrayList<>(4);
+            try {
+                nexts.add(map[x - 1][y]);
+            } catch (Exception ignore) { }
+            try {
+                nexts.add(map[x + 1][y]);
+            } catch (Exception ignore) { }
+            try {
+                nexts.add(map[x][y - 1]);
+            } catch (Exception ignore) { }
+            try {
+                nexts.add(map[x][y + 1]);
+            } catch (Exception ignore) { }
+            for (Field next : nexts) {
+                if (!in.contains(next)) {
+                    neighbors.add(next);
+                }
+            }
+            newIn = neighbors.remove(rnd.nextInt(neighbors.size()));
+            x = newIn.getX();
+            y = newIn.getY();
+
+            Field finalNewIn = newIn;
+            // Is field left against newIn?
+            Predicate<Field> left = field -> field.getY() == finalNewIn.getY() && field.getX() + 1 == finalNewIn.getX();
+            // is field right against newIn
+            Predicate<Field> right = field -> field.getY() == finalNewIn.getY() && field.getX() - 1 == finalNewIn.getX();
+            Predicate<Field> up = field -> field.getX() == finalNewIn.getX() && field.getY() + 1 == finalNewIn.getY();
+            Predicate<Field> down = field -> field.getX() == finalNewIn.getX() && field.getY() - 1 == finalNewIn.getY();
+            Field connect = in.stream()
+                    .filter(left.or(right).or(up).or(down))
+                    .findFirst()
+                    .orElse(null);
+            assert connect != null;
+            // is connect up against newIn
+            if (up.test(connect)) {
+                connect.setDown(true);
+                newIn.setUp(true);
+            } else if (down.test(connect)) {
+                connect.setUp(true);
+                newIn.setDown(true);
+            } else if (right.test(connect)) {
+                connect.setLeft(true);
+                newIn.setRight(true);
+            } else if (left.test(connect)) {
+                connect.setRight(true);
+                newIn.setLeft(true);
+            }
+            in.add(newIn);
+        } while (!neighbors.isEmpty());
     }
 
     public void displayMap() {
-        for (int j = player.getY() - 2; j <= player.getY() + 2; j++) {
+        for (int j = player.getY() - viewDistance; j <= player.getY() + viewDistance; j++) {
             displayRowUpperBorders(j);
             displayDataRow(j);
+            if (j == height - 1) {
+                displayRowBottomBorders(j);
+            }
         }
-        displayRowBottomBorders(player.getY() + 2);
     }
 
     private void displayDataRow(int row) {
-        for (int i = player.getX() - 2; i <= player.getX() + 2; i++) {
+        for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
             Field field;
             try {
                 field = map[i][row];
-                System.out.print((field.left ? NO_WALL : VERTICAL_WALL) + getInteractiveChar(field.getInteractive()));
+                System.out.print((field.canLeft() ? NO_WALL : VERTICAL_WALL) + getInteractiveChar(field.getInteractive()));
+                if (i == width - 1) {
+                    System.out.print((field.canRight() ? NO_WALL : VERTICAL_WALL));
+                }
             } catch (IndexOutOfBoundsException e) {
                 System.out.print(NO_WALL + EMPTY_FIELD);
             }
         }
-        if (row >= 0 && row < height) {
-            System.out.println(map[width - 1][row].right ? NO_WALL : VERTICAL_WALL);
-        } else {
-            System.out.println(NO_WALL);
-        }
+        System.out.println();
     }
 
     private void displayRowUpperBorders(int row) {
-        for (int i = player.getX() - 2; i <= player.getX() + 2; i++) {
+        for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
             try {
                 Field field = map[i][row];
-                System.out.print(VERTICAL_WALL + (field.up ? EMPTY_FIELD : HORIZONTAL_WALL));
+                System.out.print(VERTICAL_WALL + (field.canUp() ? EMPTY_FIELD : HORIZONTAL_WALL));
+                if (i == width - 1) {
+                    System.out.print(VERTICAL_WALL);
+                }
             } catch (IndexOutOfBoundsException e) {
                 System.out.print(NO_WALL + EMPTY_FIELD);
             }
         }
-        if (row >= 0 && row < height) {
-            System.out.println(VERTICAL_WALL);
-        } else {
-            System.out.println(NO_WALL);
-        }
+        System.out.println();
     }
 
     private void displayRowBottomBorders(int row) {
-        for (int i = player.getX() - 2; i <= player.getX() + 2; i++) {
+        for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
             try {
                 Field field = map[i][row];
-                System.out.print(VERTICAL_WALL + (field.down ? EMPTY_FIELD : HORIZONTAL_WALL));
+                System.out.print(VERTICAL_WALL + (field.canDown() ? EMPTY_FIELD : HORIZONTAL_WALL));
+                if (i == width - 1) {
+                    System.out.print(VERTICAL_WALL);
+                }
             } catch (IndexOutOfBoundsException e) {
                 System.out.print(NO_WALL + EMPTY_FIELD);
             }
         }
-        if (row >= 0 && row < height) {
-            System.out.println(VERTICAL_WALL);
-        } else {
-            System.out.println(NO_WALL);
-        }
+        System.out.println();
     }
 
     private String getInteractiveChar(Interactive interactive) {
