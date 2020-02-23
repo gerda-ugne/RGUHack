@@ -1,6 +1,6 @@
 package com.company.interactives;
 
-public class Trap extends Position implements Interactive {
+public class Trap extends Interactive {
 
     private boolean visible;
 

@@ -1,7 +1,7 @@
 package com.company.interactives;
 
-public interface Interactive {
+public abstract class Interactive extends Position {
 
-    void setVisibility(boolean visibility);
-    boolean isVisible();
+    abstract void setVisibility(boolean visibility);
+    abstract boolean isVisible();
 }
