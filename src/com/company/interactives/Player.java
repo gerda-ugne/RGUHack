@@ -109,6 +109,22 @@ public class Player extends Character {
         }
     }
 
+    public void addOil(int add)
+    {
+        oil = oil + add;
+        if(oil>100) oil = 0;
+
+    }
+
+    public int getOil()
+    {
+        return oil;
+    }
+    public void setOil(int oil)
+    {
+        this.oil = oil;
+    }
+
     /**
      * Executes choices that player has made by calling appropriate methods
      * @param move - move the player chose

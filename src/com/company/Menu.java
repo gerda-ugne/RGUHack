@@ -87,6 +87,11 @@ public class Menu
 
                     do {
 
+                        if(game.getPlayer().getOil() < 5)
+                        {
+                            System.out.println("You have run out of oil. The darkness consumes you.");
+                            game.gameOver();
+                        }
                         game.displayMap();
                         System.out.println("\nChoose your direction of floating:");
 
@@ -94,6 +99,9 @@ public class Menu
                         System.out.println("d   - to go down");
                         System.out.println("l   - to go left");
                         System.out.println("r   - to go right");
+
+                        System.out.println("\n Each turn consumes oil. You have " + game.getPlayer().getOil() +" oil left. Make sure it " +
+                                "doesn't run out, otherwise the nightmares might end you.");
 
                         System.out.println("0   - to return");
 
@@ -103,6 +111,7 @@ public class Menu
 
                         if(canMove)
                         {
+                            game.getPlayer().setOil(game.getPlayer().getOil() - 5);
                             System.out.println("You have moved.\n");
                             game.displayMap();
                         }

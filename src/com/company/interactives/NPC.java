@@ -7,7 +7,13 @@ public class NPC extends Character {
     public NPC()
     {
         super();
-        name = "NPC";
+        name = "Stranger";
+        getInv().addToInventory("Oil");
+        getInv().addToInventory("Oil");
+        getInv().addToInventory("Liquid light potion");
+        getInv().addToInventory("Liquid light potion");
+        getInv().addToInventory("Dreamcatcher");
+        getInv().addToInventory("Dreamcatcher");
 
     }
 
