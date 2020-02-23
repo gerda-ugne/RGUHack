@@ -45,21 +45,19 @@ public class Game {
 
         width = 20;
         height = 10;
-        viewDistance = 20;
+        viewDistance = 8;
 
         player = new Player();
         tempInteractive = null;
 
         player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
-//        player.setPosition(0, 0);
-//        enemy.setPosition(0, 1);
-//        trap.setPosition(1, 0);
 
         map = new Field[width][height];
         createMap();
 
         map[player.getX()][player.getY()].setInteractive(player);
         generateMapItems();
+        generateExit();
     }
 
     private void createMap() {
@@ -131,9 +129,9 @@ public class Game {
         } while (!neighbors.isEmpty());
     }
 
-    int enemyNum;
-    int npcNum;
-    int trapNum;
+    private int enemyNum;
+    private int npcNum;
+    private int trapNum;
 
     private void generateMapItems() {
         float max = width * height;
@@ -184,7 +182,6 @@ public class Game {
         if (interactive instanceof Enemy) enemyNum--;
         else if (interactive instanceof NPC) npcNum--;
         else if (interactive instanceof Trap) trapNum--;
-        displayMap();
     }
 
     private boolean isPlacementAllowed(Interactive interactive, int x, int y) {
@@ -202,11 +199,21 @@ public class Game {
         return true;
     }
 
+    private void generateExit() {
+        boolean top = player.getY() % (width / 2) == 0;
+        int x = rnd.nextInt(width);
+        if (top) {
+            map[x][0].setUp(true);
+        } else {
+            map[x][height - 1].setDown(true);
+        }
+    }
+
     public void displayMap() {
         for (int j = player.getY() - viewDistance; j < player.getY() + viewDistance; j++) {
             displayRowUpperBorders(j);
             displayDataRow(j);
-            if (j == height - 1) {
+            if (j == player.getY() + viewDistance - 1 || j == height - 1) {
                 displayRowBottomBorders(j);
             }
         }
@@ -218,7 +225,7 @@ public class Game {
             try {
                 field = map[i][row];
                 System.out.print((field.canLeft() ? NO_WALL : VERTICAL_WALL) + getInteractiveChar(field.getInteractive()));
-                if (i == width - 1) {
+                if (i == player.getX() + viewDistance || i == width - 1) {
                     System.out.print((field.canRight() ? NO_WALL : VERTICAL_WALL));
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -233,7 +240,7 @@ public class Game {
             try {
                 Field field = map[i][row];
                 System.out.print(VERTICAL_WALL + (field.canUp() ? EMPTY_FIELD : HORIZONTAL_WALL));
-                if (i == width - 1) {
+                if (i == player.getX() + viewDistance || i == width - 1) {
                     System.out.print(VERTICAL_WALL);
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -248,7 +255,7 @@ public class Game {
             try {
                 Field field = map[i][row];
                 System.out.print(VERTICAL_WALL + (field.canDown() ? EMPTY_FIELD : HORIZONTAL_WALL));
-                if (i == width - 1) {
+                if (i == player.getX() + viewDistance || i == width - 1) {
                     System.out.print(VERTICAL_WALL);
                 }
             } catch (IndexOutOfBoundsException e) {
