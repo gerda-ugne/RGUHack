@@ -113,7 +113,7 @@ public class Player extends Character {
     public void addOil(int add)
     {
         oil = oil + add;
-        if(oil>100) oil = 0;
+        if(oil>100) oil = 100;
 
     }
 
