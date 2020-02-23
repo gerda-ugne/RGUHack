@@ -6,6 +6,8 @@ import java.util.Random;
 
 public class Player extends Character {
 
+    private static final int MAX_OIL = 100;
+
     private int oil;
 
     public Player()
