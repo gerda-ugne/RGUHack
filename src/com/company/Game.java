@@ -566,9 +566,9 @@ public class Game {
                 }
 
             }
-            // Add the enemy which dead this turn (or null)
+            // Add the enemy which dead this turn (or null) to the respawn queue
             respawnQueue.add(deadEnemy);
-            // respawn the enemies dead for 5 turns or do nothing
+            // respawn the enemies dead for the defined turns or do nothing
             Enemy resurrect = respawnQueue.remove();
             if (resurrect != null) resurrect.setHealth(Character.MAX_HEALTH);
 
@@ -885,6 +885,7 @@ public class Game {
         if (!enemy.isCharacterAlive()) {
             System.out.println("\nYou overwhelm your night terrors. You win, for now.");
 
+            // TODO randomize loot
             player.getInv().addToInventory("Rock");
             player.addOil(30);
 
