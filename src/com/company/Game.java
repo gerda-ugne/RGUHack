@@ -257,7 +257,7 @@ public class Game {
                         line = line.concat(field.canRight() ? NO_WALL[j] : VERTICAL_WALL[j]);
                     }
                 } catch (IndexOutOfBoundsException e) {
-                    line = line.concat(OUTSIDE_MAZE.repeat(EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length()));
+                    line = line.concat(outsideMazeCell());
                 }
             }
             System.out.println(line);
@@ -275,7 +275,7 @@ public class Game {
                     System.out.print(VERTICAL_WALL[1]);
                 }
             } catch (IndexOutOfBoundsException e) {
-                System.out.print(OUTSIDE_MAZE.repeat(EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length()));
+                System.out.print(outsideMazeCell());
             }
         }
         System.out.println();
@@ -292,10 +292,14 @@ public class Game {
                     System.out.print(VERTICAL_WALL[1]);
                 }
             } catch (IndexOutOfBoundsException e) {
-                System.out.print(OUTSIDE_MAZE.repeat(EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length()));
+                System.out.print(outsideMazeCell());
             }
         }
         System.out.println();
+    }
+
+    private String outsideMazeCell() {
+        return OUTSIDE_MAZE.repeat(EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length());
     }
 
     private String[] getInteractiveChar(Interactive interactive) {
@@ -534,6 +538,11 @@ public class Game {
                     //Invalid input therefore cannot move
                     return false;
             }
+            try {
+                Field field = map[newX][newY];
+            } catch (ArrayIndexOutOfBoundsException e) {
+                win();
+            }
             //Puts down the old interactive
             if (tempInteractive != null && !(tempInteractive.equals(player))) {
                 map[tempInteractive.getX()][tempInteractive.getY()].setInteractive(tempInteractive);
@@ -717,6 +726,7 @@ public class Game {
      * Disables traps if they exist
      * @return false/true whether there were traps to disable
      */
+
     public boolean disableTrap()
     {
         int playerX = player.getX();
@@ -772,7 +782,6 @@ public class Game {
 
         return trapExists;
     }
-
     public void showCombatOptions()
     {
         System.out.println("\nRegular attacks\n");
@@ -793,6 +802,7 @@ public class Game {
     }
 
     // return -1: death, 0: flee, 1: victory
+
     public int combat(int x, int y) {
         System.out.println("\nYou feel like you're being watched. You might not be ready, but you must face your night terrors.");
         Scanner s = new Scanner(System.in);
@@ -918,6 +928,11 @@ public class Game {
 
         return -1;
 
+    }
+
+    private void win() {
+        System.out.println("Congratulation! You won!");
+        System.exit(2);
     }
 
     public void gameOver()
