@@ -1,5 +1,9 @@
 package com.company.interactives;
 
+/**
+ * Abstract class that adds position element
+ * to the needed classes.
+ */
 public abstract class Position {
 
     int x;

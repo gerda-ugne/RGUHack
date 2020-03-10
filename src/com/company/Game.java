@@ -7,6 +7,12 @@ import com.company.map.Field;
 import java.util.*;
 import java.util.function.Predicate;
 
+/**
+ * The Game class contains the random map generation,
+ * as well as handles the movement of the player
+ * and interaction with the faced objects.
+ *
+ */
 public class Game {
 
     private static final String[] VERTICAL_WALL = new String[] {"|", "|", "|"};
@@ -42,6 +48,9 @@ public class Game {
     boolean firstMonster = true;
     boolean firstNPC = true;
 
+    /**
+     * Default constructor for the game class.
+     */
     public Game()
     {
         rnd = new Random();
@@ -69,6 +78,9 @@ public class Game {
         generateExit();
     }
 
+    /**
+     * Randomly generates a maze map using Prim's algorithm.
+     */
     private void createMap() {
         Set<Field> in = new HashSet<>(width * height);
         List<Field> neighbors = new ArrayList<>(width * height / 2);
@@ -605,6 +617,11 @@ public class Game {
         firstNPC = false;
     }
 
+    /**
+     * Handles the interaction with the NPC.
+     * @param x
+     * @param y
+     */
     private void npcInteract(int x, int y)
     {
         NPC npc = (NPC) tempInteractive;
@@ -712,7 +729,7 @@ public class Game {
     }
 
 
-    /*
+    /**
      * Disables traps if they exist
      * @return false/true whether there were traps to disable
      */
@@ -772,6 +789,9 @@ public class Game {
         return trapExists;
     }
 
+    /**
+     * Displays the possible combat options for the player.
+     */
     public void showCombatOptions()
     {
         System.out.println("\nRegular attacks\n");
@@ -792,6 +812,15 @@ public class Game {
     }
 
     // return -1: death, 0: flee, 1: victory
+
+    /**
+     * Combat method is brought up whenever
+     * the player faces an enemy.
+     * @param x
+     * @param y
+     * @return number depending on outcome: -1 for death,
+     * 0 for fleeing and 1 for victory.
+     */
     public int combat(int x, int y) {
         System.out.println("\nYou feel like you're being watched. You might not be ready, but you must face your night terrors.");
         Scanner s = new Scanner(System.in);
@@ -810,7 +839,7 @@ public class Game {
 
             System.out.println("\nYour status:");
             System.out.println("Your health: " + player.getHealth());
-            System.out.println("Your will power: " + player.getMana());
+            System.out.println("Your will power: " + player.getPower());
             System.out.println();
 
             enemyDamage = 0;
@@ -835,7 +864,7 @@ public class Game {
                         player.healHP();
                         break;
                     case "10":
-                        player.healMP();
+                        player.healPW();
                         break;
                     case "0":
                         player.flee();
@@ -856,7 +885,7 @@ public class Game {
             //Enemy has their turn
             System.out.println("\nMonster status:");
             System.out.println("Monster health: " + enemy.getHealth());
-            System.out.println("Monster will power: " + enemy.getMana());
+            System.out.println("Monster will power: " + enemy.getPower());
             ;
             System.out.println();
 
@@ -878,7 +907,7 @@ public class Game {
                     enemy.healHP();
                     break;
                 case "4":
-                    enemy.healMP();
+                    enemy.healPW();
                     break;
             }
 
@@ -919,6 +948,9 @@ public class Game {
 
     }
 
+    /**
+     * Method that calls the game over screen.
+     */
     public void gameOver()
     {
         System.out.println("\n  You Died.\n" +

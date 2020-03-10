@@ -2,6 +2,11 @@ package com.company;
 
 import java.util.*;
 
+/**
+ * Inventory class contains a list
+ * of inventory items as well as its capacity.
+ *
+ */
 public class Inventory
 {
     private List<Item> inventory;
@@ -11,16 +16,17 @@ public class Inventory
         capacity = 30;
         this.inventory = new ArrayList<>();
 
-//        inventory.add(NUTRIENTS);
-//        inventory.add(NUTRIENTS);
-//        inventory.add(WAX);
-//        inventory.add(WAX);
     }
 
     public List<Item> getInventory() {
         return inventory;
     }
 
+    /**
+     * Searches for an item in the inventory.
+     * @param itemName item that is being searched
+     * @return found item or null if not found
+     */
     public Item returnItem(String itemName)
     {
         for (int i = 0;  i<inventory.size(); i++){
@@ -38,6 +44,10 @@ public class Inventory
         this.inventory = inventory;
     }
 
+    /**
+     * Adds item to the inventory by name
+     * @param itemName - item to add
+     */
     public void addToInventory(String itemName) {
 
         Item item = new Item(itemName, 30);
@@ -47,6 +57,9 @@ public class Inventory
         else System.out.println("Your inventory is full. You cannot pick up any more items!");
     }
 
+    /**
+     * Displays the inventory.
+     */
     public void showInventory() {
         for (Item item : inventory) {
             item.showItemInformation();

@@ -1,5 +1,9 @@
 package com.company.interactives;
 
+/**
+ * Trap class represents the
+ * traps you can find in game.
+ */
 public class Trap extends Interactive {
 
     private boolean visible;

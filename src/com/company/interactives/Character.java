@@ -2,15 +2,21 @@ package com.company.interactives;
 
 import com.company.Inventory;
 
+/**
+ * Abstract character class that contains
+ * main fields needed for implementing the player, enemy
+ * and npc characters in the game.
+ *
+ */
 public abstract class Character extends Interactive {
 
     public static final int MAX_HEALTH = 100;
-    public static final int MAX_MANA = 100;
+    public static final int MAX_POWER = 100;
     public static final int MAX_CURRENCY = 100;
 
     protected boolean visible;
     private int health;
-    public int mana;
+    public int power;
     private int currency;
 
     private Inventory inv = new Inventory();
@@ -18,7 +24,7 @@ public abstract class Character extends Interactive {
     public Character(){
 
         health = MAX_HEALTH;
-        mana = MAX_MANA;
+        power = MAX_POWER;
         currency = MAX_CURRENCY;
 
     }
@@ -41,12 +47,12 @@ public abstract class Character extends Interactive {
         this.health = health;
     }
 
-    public int getMana() {
-        return mana;
+    public int getPower() {
+        return power;
     }
 
-    public void setMana(int mana) {
-        this.mana = mana;
+    public void setPower(int power) {
+        this.power = power;
     }
 
     public int getCurrency() {
@@ -74,7 +80,7 @@ public abstract class Character extends Interactive {
     public void checkStatus(){
 
         System.out.println("Health:  " + health);
-        System.out.println("Will power::  " + mana);
+        System.out.println("Will power::  " + power);
 
     }
 
@@ -83,7 +89,7 @@ public abstract class Character extends Interactive {
     public abstract int specialAttack();
     public abstract void healHP();
 
-    public abstract void healMP();
+    public abstract void healPW();
 
     public abstract int execute(char move);
 }

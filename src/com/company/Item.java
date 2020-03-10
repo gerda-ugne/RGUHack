@@ -1,5 +1,8 @@
 package com.company;
 
+/**
+ * Item class contains items that go into the inventory.
+ */
 public class Item {
 
     String itemName;
@@ -16,6 +19,10 @@ public class Item {
         this.price = price;
 
     }
+
+    /**
+     * Displays the information about the item.
+     */
     public void showItemInformation()
     {
         System.out.println( itemName+ ". Its price is " + price + ".");

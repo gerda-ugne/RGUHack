@@ -1,15 +1,21 @@
 package com.company.interactives;
 
-import com.company.Inventory;
-
 import java.util.Random;
 
+/**
+ * Player class contains information about the player.
+ * Combat methods and item consumption methods are also included.
+ */
 public class Player extends Character {
 
     public final int MAX_OIL;
 
     private int oil;
 
+    /**
+     * Constructor for Player class
+     * @param maxOil
+     */
     public Player(int maxOil)
     {
         super();
@@ -41,7 +47,7 @@ public class Player extends Character {
     public int specialAttack()
     {
         Random rand = new Random();
-        if(getMana() < 40)
+        if(getPower() < 40)
         {
             System.out.println("You don't have enough will power to cast the special attack! You rest.");
             return 0;
@@ -49,7 +55,7 @@ public class Player extends Character {
 
         int damage = rand.nextInt(50);
         System.out.println("You have inflicted " + damage + " points of damage.");
-        setMana(getMana() - 40);
+        setPower(getPower() - 40);
 
         return damage;
 
@@ -87,7 +93,7 @@ public class Player extends Character {
      *
      */
     @Override
-    public void healMP()
+    public void healPW()
     {
         boolean itemFound = false;
         itemFound = getInv().remove("Liquid light");
@@ -95,13 +101,13 @@ public class Player extends Character {
 
         if(itemFound == true)
         {
-            int MPPoints = 50;
+            int PWPoints = 50;
 
             System.out.println("You have used a liquid light potion to restore your will power.");
-            System.out.println("You have gained " + MPPoints + " will power points.");
+            System.out.println("You have gained " + PWPoints + " will power points.");
 
-            setMana(getMana() + MPPoints);
-            if(getMana() > 100) setMana(100);
+            setPower(getPower() + PWPoints);
+            if(getPower() > 100) setPower(100);
 
         }
         else
@@ -141,13 +147,16 @@ public class Player extends Character {
                 case '1': damage = damage + attack(); break;
                 case '2': damage = damage + specialAttack(); break;
                 case '3': healHP(); break;
-                case '4': healMP(); break;
+                case '4': healPW(); break;
 
             }
 
         return damage;
     }
 
+    /**
+     * Steps out of combat.
+     */
     public void flee()
     {
         System.out.println("You've chosen to flee your nightmares.");

@@ -1,6 +1,12 @@
 package com.company;
 
 import java.util.*;
+
+/**
+ * The main class for the project Dream Realm.
+ * It contains a menu with options, as well as an introduction to the game.
+ *
+ */
 public class Menu
 {
     Game game;
@@ -199,14 +205,6 @@ public class Menu
     }
 
     /**
-     * Starts the game
-     */
-    public void  startGame()
-    {
-
-    }
-
-    /**
      * Saves the game progress
      */
     public void saveGame()
@@ -222,6 +220,12 @@ public class Menu
 
     }
 
+    /**
+     * Slowly types the text to give it
+     * a game-like feeling.
+     *
+     * @param text - text to type
+     */
     public void typeSlow(String text)
     {
         String[] txt = text.split("");
@@ -237,6 +241,14 @@ public class Menu
         scanner.nextLine();
     }
 
+    /**
+     * Slowly types the text to give it a
+     * game - like feeling.
+     *
+     * This method is slower than typeSlow method.
+     *
+     * @param text - text to type
+     */
     public void typeSlowest(String text)
     {
         String[] txt = text.split("");
@@ -250,6 +262,10 @@ public class Menu
         System.out.println();
     }
 
+    /**
+     * Sleeps a thread.
+     * @param time
+     */
     public void sleepMe(int time)
     {
         try

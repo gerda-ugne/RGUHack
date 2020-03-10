@@ -1,5 +1,9 @@
 package com.company.interactives;
 
+/**
+ * NPC class contains information about NPCs.
+ *
+ */
 public class NPC extends Character {
 
     private String name;
@@ -45,7 +49,7 @@ public class NPC extends Character {
     }
 
     @Override
-    public void healMP() {
+    public void healPW() {
 
     }
 

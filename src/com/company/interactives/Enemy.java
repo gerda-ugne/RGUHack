@@ -2,6 +2,11 @@ package com.company.interactives;
 
 import java.util.Random;
 
+/**
+ * Enemy class contains information about enemies.
+ * It contains the combat methods for each enemy.
+ *
+ */
 public class Enemy extends Character {
 
     public Enemy()
@@ -35,7 +40,7 @@ public class Enemy extends Character {
     public int specialAttack()
     {
         Random rand = new Random();
-        if (getMana() < 40)
+        if (getPower() < 40)
         {
             System.out.println("Monster has ran out of focus to continue their attack for this turn.");
             return 0;
@@ -44,7 +49,7 @@ public class Enemy extends Character {
         System.out.println("Monster reveals your darkest nightmares.");
         System.out.println("Monster has inflicted " + damage + " points of damage.");
 
-        setMana(getMana() - 40);
+        setPower(getPower() - 40);
 
         return damage;
 
@@ -71,15 +76,15 @@ public class Enemy extends Character {
      *
      */
     @Override
-    public void healMP()
+    public void healPW()
     {
         int MPPoints = 10;
 
         System.out.println("Monster screams in anguish, replenishing its super powers.");
         System.out.println("Monster has gained " + MPPoints + " focus points.");
 
-        setMana(getMana() + MPPoints);
-        if(getMana() >100) setMana(100);
+        setPower(getPower() + MPPoints);
+        if(getPower() >100) setPower(100);
     }
 
 
@@ -100,7 +105,7 @@ public class Enemy extends Character {
                 case '1': damage = damage + attack(); break;
                 case '2': damage = damage + specialAttack(); break;
                 case '3': healHP(); break;
-                case '4': healMP(); break;
+                case '4': healPW(); break;
 
             }
 
