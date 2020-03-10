@@ -163,7 +163,7 @@ public class Menu
                  }
                case "4":
                {
-                   System.out.println("/n Here is your inventory. Defeat your nightmares or trade to acquire more items.\n");
+                   System.out.println("\nHere is your inventory. Defeat your nightmares or trade to acquire more items.\n");
                    game.getPlayer().getInv().showInventory();break;
                }
 

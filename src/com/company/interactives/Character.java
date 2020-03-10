@@ -80,7 +80,7 @@ public abstract class Character extends Interactive {
     public void checkStatus(){
 
         System.out.println("Health:  " + health);
-        System.out.println("Will power::  " + power);
+        System.out.println("Will power:  " + power);
 
     }
 
