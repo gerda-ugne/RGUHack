@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 /**
  * The Game class contains the random map generation,
  * as well as handles the movement of the player
- * and interaction with the faced objects.
+ * and the interaction with the faced objects.
  *
  */
 public class Game {
