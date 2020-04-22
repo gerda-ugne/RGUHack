@@ -3,6 +3,7 @@ package gerda.arcfej.dreamrealm;
 import gerda.arcfej.dreamrealm.interactives.*;
 import gerda.arcfej.dreamrealm.interactives.Character;
 import gerda.arcfej.dreamrealm.map.Field;
+import gerda.arcfej.dreamrealm.utils.StringUtils;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -311,7 +312,7 @@ public class Game {
     }
 
     private String outsideMazeCell() {
-        return OUTSIDE_MAZE.repeat(EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length());
+        return StringUtils.repeat(OUTSIDE_MAZE, EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length());
     }
 
     private String[] getInteractiveChar(Interactive interactive) {
