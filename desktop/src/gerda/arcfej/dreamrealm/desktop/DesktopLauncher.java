@@ -1,12 +1,16 @@
 package gerda.arcfej.dreamrealm.desktop;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import gerda.arcfej.dreamrealm.GameCore;
 
 public class DesktopLauncher {
+
 	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new GameCore(), config);
+		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		config.setTitle("Dream Realm");
+		config.setWindowedMode(480, 320);
+
+		new Lwjgl3Application(new GameCore(), config);
 	}
 }

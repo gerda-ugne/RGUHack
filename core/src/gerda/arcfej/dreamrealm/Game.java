@@ -1,8 +1,8 @@
-package com.company;
+package gerda.arcfej.dreamrealm;
 
-import com.company.interactives.*;
-import com.company.interactives.Character;
-import com.company.map.Field;
+import gerda.arcfej.dreamrealm.interactives.*;
+import gerda.arcfej.dreamrealm.interactives.Character;
+import gerda.arcfej.dreamrealm.map.Field;
 
 import java.util.*;
 import java.util.function.Predicate;

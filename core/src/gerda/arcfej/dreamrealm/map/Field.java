@@ -1,7 +1,6 @@
 package gerda.arcfej.dreamrealm.map;
 
-import com.company.interactives.Interactive;
-import com.company.interactives.Position;
+import gerda.arcfej.dreamrealm.interactives.Interactive;
 
 import java.util.Set;
 

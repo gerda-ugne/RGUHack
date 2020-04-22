@@ -1,4 +1,4 @@
-package com.company;
+package gerda.arcfej.dreamrealm;
 
 /**
  * Item class contains items that go into the inventory.

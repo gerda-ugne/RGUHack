@@ -1,5 +1,7 @@
 package gerda.arcfej.dreamrealm.interactives;
 
+import gerda.arcfej.dreamrealm.map.Position;
+
 /**
  * Abstract class to make fields interactive.
  */

@@ -1,6 +1,6 @@
 package gerda.arcfej.dreamrealm.interactives;
 
-import com.company.Inventory;
+import gerda.arcfej.dreamrealm.Inventory;
 
 /**
  * Abstract character class that contains
