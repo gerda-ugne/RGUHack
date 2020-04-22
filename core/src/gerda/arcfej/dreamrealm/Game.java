@@ -24,6 +24,7 @@ public class Game {
     private static final String[] DEAD_ENEMY = new String[] { " x x ", "  ^  " ,  " ^^^ "};
     private static final String[] NPC = new String[] { "  $  ", " $$$ ", "  $  "};
     private static final String[] TRAP = new String[] { "     ", " ^^^ ", "     "};
+    private static final String OUTSIDE_MAZE = "#";
 
     private static final int ENEMIES_PERCENT = 12;
     private static final int NPCS_PERCENT = 6;
@@ -243,10 +244,10 @@ public class Game {
     }
 
     public void displayMap() {
-        for (int j = player.getY() - viewDistance; j < player.getY() + viewDistance; j++) {
+        for (int j = player.getY() - viewDistance; j <= player.getY() + viewDistance; j++) {
             displayRowUpperBorders(j);
             displayDataRow(j);
-            if (j == player.getY() + viewDistance - 1 || j == height - 1) {
+            if (j == player.getY() + viewDistance || j == height - 1) {
                 displayRowBottomBorders(j);
             }
         }
@@ -268,7 +269,7 @@ public class Game {
                         line = line.concat(field.canRight() ? NO_WALL[j] : VERTICAL_WALL[j]);
                     }
                 } catch (IndexOutOfBoundsException e) {
-                    line = line.concat(NO_WALL[j] + EMPTY_FIELD[j]);
+                    line = line.concat(outsideMazeCell());
                 }
             }
             System.out.println(line);
@@ -286,7 +287,7 @@ public class Game {
                     System.out.print(VERTICAL_WALL[1]);
                 }
             } catch (IndexOutOfBoundsException e) {
-                System.out.print(NO_WALL[1] + EMPTY_FIELD[1]);
+                System.out.print(outsideMazeCell());
             }
         }
         System.out.println();
@@ -303,10 +304,14 @@ public class Game {
                     System.out.print(VERTICAL_WALL[1]);
                 }
             } catch (IndexOutOfBoundsException e) {
-                System.out.print(NO_WALL[1] + EMPTY_FIELD[1]);
+                System.out.print(outsideMazeCell());
             }
         }
         System.out.println();
+    }
+
+    private String outsideMazeCell() {
+        return OUTSIDE_MAZE.repeat(EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length());
     }
 
     private String[] getInteractiveChar(Interactive interactive) {
@@ -544,6 +549,11 @@ public class Game {
                 default:
                     //Invalid input therefore cannot move
                     return false;
+            }
+            try {
+                Field field = map[newX][newY];
+            } catch (ArrayIndexOutOfBoundsException e) {
+                win();
             }
             //Puts down the old interactive
             if (tempInteractive != null && !(tempInteractive.equals(player))) {
@@ -811,8 +821,6 @@ public class Game {
 
     }
 
-    // return -1: death, 0: flee, 1: victory
-
     /**
      * Combat method is brought up whenever
      * the player faces an enemy.
@@ -946,6 +954,11 @@ public class Game {
 
         return -1;
 
+    }
+
+    private void win() {
+        System.out.println("Congratulation! You won!");
+        System.exit(2);
     }
 
     /**
