@@ -88,6 +88,10 @@ public class GameCore extends ApplicationAdapter {
 
 		// Initialize batch (Which draws 2d images on the screen)
 		batch = new SpriteBatch();
+
+		// Set rendering not continuous (save battery), because the game is static unless user input happens.
+		Gdx.graphics.setContinuousRendering(false);
+		Gdx.graphics.requestRendering();
 	}
 
 	@Override
