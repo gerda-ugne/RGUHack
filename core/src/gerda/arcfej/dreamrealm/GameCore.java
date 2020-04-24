@@ -112,6 +112,7 @@ public class GameCore extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		batch.dispose();
+
 		for (Texture wall : walls) {
 			wall.dispose();
 		}
@@ -124,5 +125,7 @@ public class GameCore extends ApplicationAdapter {
 		deadEnemy.dispose();
 		shop.dispose();
 		trap.dispose();
+
+		map.dispose();
 	}
 }
