@@ -1,9 +1,21 @@
 package gerda.arcfej.dreamrealm.screens;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import gerda.arcfej.dreamrealm.GameCore;
 import gerda.arcfej.dreamrealm.screens.GameScreen;
 
 import java.util.*;
@@ -13,61 +25,74 @@ import java.util.*;
  * It contains a menu with options, as well as an introduction to the game.
  *
  */
-public class MenuScreen implements Screen
-{
-    public MenuScreen(Game game) {
+public class MenuScreen extends ScreenAdapter {
 
-    }
+    /**
+     * The controller of the game
+     */
+    private GameCore game;
 
-    @Override
-    public void show() {
+    /**
+     * The stage to display the menu on.
+     */
+    private Stage stage;
 
-    }
+    /**
+     * Default constructor of the class.
+     *
+     * @param game The controller of the game
+     */
+    public MenuScreen(GameCore game) {
+        this.game = game;
+        stage = new Stage(new ScreenViewport());
 
-    @Override
-    public void render(float delta) {
+        VerticalGroup menu = new VerticalGroup();
+        menu.setFillParent(true);
+        stage.addActor(menu);
 
-    }
+        Label title = new Label("Dream Realm", game.skin);
+        title.setAlignment(Align.center);
+        menu.addActor(title);
 
-    @Override
-    public void resize(int width, int height) {
+        TextButton newGame = new TextButton("New Game", game.skin);
+        newGame.setX(menu.getWidth() / 2 - newGame.getWidth() / 2);
+        newGame.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
 
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                game.startNewGame();
+            }
+        });
+        menu.addActor(newGame);
     }
 
     @Override
     public void dispose() {
-
+        super.dispose();
+        stage.dispose();
     }
 
-    //    public static void main(String[] args) {
-//        Menu menu = new Menu();
-//        // Introduces play to the game
-//        menu.introduction();
-//
-//    }
-//
-//
-//    @Override
-//    public void draw(Batch batch, float parentAlpha) {
-//        super.draw(batch, parentAlpha);
-//    }
-//
-//    /**
+    @Override
+    public void show() {
+        super.show();
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    @Override
+    public void render(float delta) {
+        super.render(delta);
+        // Clear the screen to black
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        stage.act();
+        stage.draw();
+    }
+
+    //    /**
 //     * Introduction to the game.
 //     * Prompts to start a new game or load a saved game
 //     */

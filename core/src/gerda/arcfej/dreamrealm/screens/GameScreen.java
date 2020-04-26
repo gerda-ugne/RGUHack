@@ -3,6 +3,7 @@ package gerda.arcfej.dreamrealm.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -17,7 +18,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
  * and the interaction with the faced objects.
  *
  */
-public class GameScreen implements Screen {
+public class GameScreen extends ScreenAdapter {
 
     /**
      * Textures to be used in the game.
@@ -135,26 +136,6 @@ public class GameScreen implements Screen {
             map.fill();
             batch.draw(new Texture(map), viewPortWidth / 2 - mapWidth / 2f, viewportHeight / 2 - mapHeight / 2f);
         } batch.end();
-    }
-
-    @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
     }
 
     @Override
