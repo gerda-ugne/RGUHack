@@ -9,7 +9,10 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setTitle("Dream Realm");
-		config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+		// TODO solve fullScreenMode (alt + tab)
+//		config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+		config.setResizable(false);
+		config.setWindowedMode(800, 480);
 
 		new Lwjgl3Application(new GameCore(), config);
 	}
