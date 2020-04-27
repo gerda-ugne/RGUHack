@@ -16,7 +16,7 @@ import gerda.arcfej.dreamrealm.GameCore;
  * It contains a menu with options, as well as an introduction to the game.
  *
  */
-public class MenuScreen extends AbstractFullScreen {
+public class MenuScreen extends AbstractFixSizedScreen {
 
     /**
      * Default constructor of the class.
@@ -63,6 +63,21 @@ public class MenuScreen extends AbstractFullScreen {
             }
         });
         menu.addActor(loadGame);
+
+        TextButton howToPlay = new TextButton("How To Play", game.skin);
+        howToPlay.setX(menu.getWidth() / 2 - loadGame.getWidth() / 2);
+        howToPlay.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                game.showHowToPlay();
+            }
+        });
+        menu.addActor(howToPlay);
     }
 
     @Override
@@ -75,15 +90,8 @@ public class MenuScreen extends AbstractFullScreen {
         stage.draw();
     }
 
-    //    /**
-//     * Introduction to the game.
-//     * Prompts to start a new game or load a saved game
-//     */
 //    public void introduction()
 //    {
-//        //Insert introduction and ascii art here
-//        System.out.println();
-//        System.out.println();
 //        System.out.println("`" +
 //                " MMMMMMMb.                                                                           `MM                 \n" +
 //                " MM    `Mb                                                                            MM                 \n" +
@@ -104,15 +112,7 @@ public class MenuScreen extends AbstractFullScreen {
 //                "\nbefore it's too late.");
 //
 //        typeSlow("\nYou've entered the dream realm.");
-//        Scanner s = new Scanner (System.in);
-//        String input;
 //
-//        do {
-//
-//            System.out.println("\n\nPlease choose one of the following options:");
-//            System.out.println("1. Start a new game");
-//            System.out.println("2. Load a saved game");
-//            System.out.println("3. Display a game guide");
 //            System.out.println("0. Exit");
 //
 //            input = s.nextLine();

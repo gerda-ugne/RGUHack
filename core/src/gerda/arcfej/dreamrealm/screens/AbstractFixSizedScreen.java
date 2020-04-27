@@ -7,7 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import gerda.arcfej.dreamrealm.GameCore;
 
-public abstract class AbstractFullScreen extends ScreenAdapter {
+public abstract class AbstractFixSizedScreen extends ScreenAdapter {
 
     /**
      * The controller of the game
@@ -19,7 +19,7 @@ public abstract class AbstractFullScreen extends ScreenAdapter {
      */
     protected Stage stage;
 
-    public AbstractFullScreen(GameCore gameCore, SpriteBatch batch) {
+    public AbstractFixSizedScreen(GameCore gameCore, SpriteBatch batch) {
         this.gameCore = gameCore;
         stage = new Stage(new ScreenViewport(), batch);
 

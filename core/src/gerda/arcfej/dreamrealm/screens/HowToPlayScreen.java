@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import gerda.arcfej.dreamrealm.GameCore;
 
-public class LoadGameScreen extends AbstractFixSizedScreen {
+public class HowToPlayScreen extends AbstractFixSizedScreen {
 
-    public LoadGameScreen(GameCore gameCore, SpriteBatch batch) {
+    public HowToPlayScreen(GameCore gameCore, SpriteBatch batch) {
         super(gameCore, batch);
-        stage.addActor(new Label("Load Saved Games Screen", gameCore.skin));
+        stage.addActor(new Label("How To Play Screen", gameCore.skin));
     }
 
     @Override

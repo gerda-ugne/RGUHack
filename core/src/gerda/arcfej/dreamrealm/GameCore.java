@@ -4,9 +4,9 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import gerda.arcfej.dreamrealm.screens.GameScreen;
+import gerda.arcfej.dreamrealm.screens.HowToPlayScreen;
 import gerda.arcfej.dreamrealm.screens.LoadGameScreen;
 import gerda.arcfej.dreamrealm.screens.MenuScreen;
 
@@ -37,6 +37,11 @@ public class GameCore extends Game {
 	 */
 	private Screen loadGame;
 
+	/**
+	 * Game guide screen
+	 */
+	private Screen howToPlay;
+
 	@Override
 	public void create () {
 		skin = new Skin(Gdx.files.internal("skins/uiskin.json"));
@@ -45,6 +50,8 @@ public class GameCore extends Game {
 		mainMenu = new MenuScreen(this, batch);
 		game = new GameScreen(this, batch);
 		loadGame = new LoadGameScreen(this, batch);
+		howToPlay = new HowToPlayScreen(this, batch);
+
 		showMainMenu();
 	}
 
@@ -76,6 +83,10 @@ public class GameCore extends Game {
 
 	public void loadGame() {
 		setScreen(loadGame);
+	}
+
+	public void showHowToPlay() {
+		setScreen(howToPlay);
 	}
 	// TODO end of GameFunctions interface methods
 }

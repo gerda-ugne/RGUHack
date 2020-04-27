@@ -14,7 +14,7 @@ import gerda.arcfej.dreamrealm.GameCore;
  * and the interaction with the faced objects.
  *
  */
-public class GameScreen extends AbstractFullScreen {
+public class GameScreen extends AbstractFixSizedScreen {
 
     /**
      * Textures to be used in the game.
