@@ -1,16 +1,12 @@
 package gerda.arcfej.dreamrealm.screens;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import gerda.arcfej.dreamrealm.GameCore;
 
 /**
  * The Game class contains the random map generation,
@@ -18,7 +14,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
  * and the interaction with the faced objects.
  *
  */
-public class GameScreen extends ScreenAdapter {
+public class GameScreen extends AbstractFullScreen {
 
     /**
      * Textures to be used in the game.
@@ -33,27 +29,9 @@ public class GameScreen extends ScreenAdapter {
     private Texture trap;
 
     /**
-     *
-     */
-    private Stage stage;
-
-    /**
-     * Used for drawing 2d images to the screen
-     */
-    private SpriteBatch batch;
-
-    /**
-     * Used to show only a small size of a bigger canvas on the screen
-     */
-    private OrthographicCamera camera;
-
-    private final float viewPortWidth = 800;
-    private final float viewportHeight = 480;
-
-    /**
      * The map to display
      */
-    private Pixmap map;
+    private Image map;
 
     /**
      * Width of the map
@@ -65,7 +43,8 @@ public class GameScreen extends ScreenAdapter {
      */
     private final int mapHeight = 450;
 
-    public GameScreen(Game game) {
+    public GameScreen(GameCore game, SpriteBatch batch) {
+        super(game, batch);
         // Load pictures
         walls = new Texture[3];
         walls[0] = new Texture(Gdx.files.internal("dungeon/brick-wall.png"));
@@ -96,54 +75,30 @@ public class GameScreen extends ScreenAdapter {
         shop = new Texture(Gdx.files.internal("shop.png"));
         trap = new Texture(Gdx.files.internal("wolf-trap.png"));
 
-        // Initialize viewport
-        camera = new OrthographicCamera();
-        camera.setToOrtho(true, viewPortWidth, viewportHeight);
-        stage = new Stage(new ScreenViewport(camera));
-
         // Initialize map
-        map = new Pixmap(mapWidth, mapHeight, Pixmap.Format.RGB888);
-
-        // Initialize batch (Which draws 2d images on the screen)
-        batch = new SpriteBatch();
-
-        // Set rendering not continuous (save battery), because the game is static unless user input happens.
-        Gdx.graphics.setContinuousRendering(false);
-        Gdx.graphics.requestRendering();
-    }
-
-    @Override
-    public void show() {
-        Gdx.input.setInputProcessor(stage);
+        // Display the map as a blue rectangle
+        Pixmap rect = new Pixmap(mapWidth, mapHeight, Pixmap.Format.RGB888);
+        rect.setColor(0.1f, 0, .5f, 1);
+        rect.fill();
+        map = new Image(new Texture(rect));
+        map.setPosition(stage.getWidth() / 2 - mapWidth / 2, stage.getHeight() / 2 - mapHeight / 2);
+        stage.addActor(map);
     }
 
     @Override
     public void render(float delta) {
+        super.render(delta);
         // Clear the screen to black
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Tell the camera to update its matrices
-        camera.update();
-        // Set the camera's matrix to the batch (to draw upon)
-        batch.setProjectionMatrix(camera.combined);
-
-        // Begin draw
-        batch.begin(); {
-            batch.disableBlending();
-            // Display the map as a blue rectangle
-            map.setColor(0.1f, 0, .5f, 1);
-            map.fill();
-            batch.draw(new Texture(map), viewPortWidth / 2 - mapWidth / 2f, viewportHeight / 2 - mapHeight / 2f);
-        } batch.end();
+        stage.act();
+        stage.draw();
     }
 
     @Override
     public void dispose() {
-        stage.dispose();
-
-        batch.dispose();
-
+        super.dispose();
         for (Texture wall : walls) {
             wall.dispose();
         }
@@ -156,8 +111,6 @@ public class GameScreen extends ScreenAdapter {
         deadEnemy.dispose();
         shop.dispose();
         trap.dispose();
-
-        map.dispose();
     }
 
 //    private static final String[] VERTICAL_WALL = new String[] {"|", "|", "|"};

@@ -3,9 +3,11 @@ package gerda.arcfej.dreamrealm;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import gerda.arcfej.dreamrealm.screens.GameScreen;
+import gerda.arcfej.dreamrealm.screens.LoadGameScreen;
 import gerda.arcfej.dreamrealm.screens.MenuScreen;
 
 public class GameCore extends Game {
@@ -14,6 +16,11 @@ public class GameCore extends Game {
 	 * The skin to use in the game
 	 */
 	public Skin skin;
+
+	/**
+	 * Used to draw sprites on the screen
+	 */
+	private SpriteBatch batch;
 
 	/**
 	 * The main menu screen of the game
@@ -25,11 +32,19 @@ public class GameCore extends Game {
 	 */
 	private Screen game;
 
+	/**
+	 * The load saved game screen
+	 */
+	private Screen loadGame;
+
 	@Override
 	public void create () {
 		skin = new Skin(Gdx.files.internal("skins/uiskin.json"));
-		mainMenu = new MenuScreen(this);
-		game = new GameScreen(this);
+		batch = new SpriteBatch();
+
+		mainMenu = new MenuScreen(this, batch);
+		game = new GameScreen(this, batch);
+		loadGame = new LoadGameScreen(this, batch);
 		showMainMenu();
 	}
 
@@ -37,20 +52,30 @@ public class GameCore extends Game {
 	public void render () {
 		super.render();
 	}
-	
+
 	@Override
 	public void dispose () {
 		super.dispose();
+		// Dispose screens
 		mainMenu.dispose();
 		game.dispose();
+		loadGame.dispose();
+
 		skin.dispose();
+		batch.dispose();
 	}
 
+	// TODO create GameFunctions interface for this methods
 	public void showMainMenu() {
 		setScreen(mainMenu);
 	}
 
-	public void startNewGame() {
+	public void startGame() {
 		setScreen(game);
 	}
+
+	public void loadGame() {
+		setScreen(loadGame);
+	}
+	// TODO end of GameFunctions interface methods
 }
