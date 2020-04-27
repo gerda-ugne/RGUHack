@@ -65,7 +65,7 @@ public class MenuScreen extends AbstractFixSizedScreen {
         menu.addActor(loadGame);
 
         TextButton howToPlay = new TextButton("How To Play", game.skin);
-        howToPlay.setX(menu.getWidth() / 2 - loadGame.getWidth() / 2);
+        howToPlay.setX(menu.getWidth() / 2 - howToPlay.getWidth() / 2);
         howToPlay.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -78,6 +78,21 @@ public class MenuScreen extends AbstractFixSizedScreen {
             }
         });
         menu.addActor(howToPlay);
+
+        TextButton exit = new TextButton("Exit", game.skin);
+        exit.setX(menu.getWidth() / 2 - exit.getWidth() / 2);
+        exit.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                Gdx.app.exit();
+            }
+        });
+        menu.addActor(exit);
     }
 
     @Override
