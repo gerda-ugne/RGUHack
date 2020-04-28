@@ -1,0 +1,104 @@
+
+enemies.png
+size: 2048,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+bully-minion
+  rotate: false
+  xy: 324, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+ceiling-barnacle
+  rotate: false
+  xy: 968, 646
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+evil-bat
+  rotate: false
+  xy: 646, 646
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+evil-minion
+  rotate: false
+  xy: 324, 646
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+gargoyle
+  rotate: false
+  xy: 1290, 646
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+gooey-daemon
+  rotate: false
+  xy: 324, 324
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+grim-reaper
+  rotate: false
+  xy: 2, 324
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+ice-golem
+  rotate: false
+  xy: 968, 324
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+minotaur
+  rotate: false
+  xy: 646, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+shambling-mound
+  rotate: false
+  xy: 968, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+skeleton
+  rotate: false
+  xy: 1290, 324
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+spectre
+  rotate: false
+  xy: 2, 646
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+troglodyte
+  rotate: false
+  xy: 646, 324
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+werewolf
+  rotate: false
+  xy: 2, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1

@@ -5,8 +5,13 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.utils.Array;
 import gerda.arcfej.dreamrealm.GameCore;
+import gerda.arcfej.dreamrealm.interactives.Player;
+
+import static com.badlogic.gdx.graphics.g2d.TextureAtlas.*;
 
 /**
  * The Game class contains the random map generation,
@@ -17,16 +22,23 @@ import gerda.arcfej.dreamrealm.GameCore;
 public class GameScreen extends AbstractFixSizedScreen {
 
     /**
+     * Texture atlases
+     */
+    private TextureAtlas dungeon;
+    private TextureAtlas interactives;
+    private TextureAtlas enemyAtlas;
+
+    /**
      * Textures to be used in the game.
      */
-    private Texture[] walls;
-    private Texture exit;
-    private Texture path;
-    private Texture player;
-    private Texture[] enemies;
-    private Texture deadEnemy;
-    private Texture shop;
-    private Texture trap;
+    private Array<AtlasRegion> walls;
+    private Array<AtlasRegion> enemies;
+    private AtlasRegion exit;
+    private AtlasRegion path;
+    private AtlasRegion playerTexture;
+    private AtlasRegion deadEnemy;
+    private AtlasRegion shop;
+    private AtlasRegion trap;
 
     /**
      * The map to display
@@ -43,46 +55,85 @@ public class GameScreen extends AbstractFixSizedScreen {
      */
     private final int mapHeight = 450;
 
-    public GameScreen(GameCore game, SpriteBatch batch) {
-        super(game, batch);
-        // Load pictures
-        walls = new Texture[3];
-        walls[0] = new Texture(Gdx.files.internal("dungeon/brick-wall.png"));
-        walls[1] = new Texture(Gdx.files.internal("dungeon/broken-wall.png"));
-        walls[2] = new Texture(Gdx.files.internal("dungeon/stone-wall.png"));
+    /**
+     * For map generation
+     */
+    private int enemiesPercent= 12;
+    private int shopsPercent = 6;
+    private int trapsPercent = 8;
+    // Number of tiles
+    private int width = 20;
+    private int height = 20;
 
-        exit = new Texture(Gdx.files.internal("dungeon/dungeon-gate.png"));
-        path = new Texture(Gdx.files.internal("dungeon/path-tile.png"));
-        player = new Texture(Gdx.files.internal("hooded-figure.png"));
+    /**
+     * For map displaying
+     */
+    private int viewDistance = 2;
 
-        enemies = new Texture[14];
-        enemies[0] = new Texture(Gdx.files.internal("enemies/bully-minion.png"));
-        enemies[1] = new Texture(Gdx.files.internal("enemies/ceiling-barnacle.png"));
-        enemies[2] = new Texture(Gdx.files.internal("enemies/evil-bat.png"));
-        enemies[3] = new Texture(Gdx.files.internal("enemies/evil-minion.png"));
-        enemies[4] = new Texture(Gdx.files.internal("enemies/gargoyle.png"));
-        enemies[5] = new Texture(Gdx.files.internal("enemies/gooey-daemon.png"));
-        enemies[6] = new Texture(Gdx.files.internal("enemies/grim-reaper.png"));
-        enemies[7] = new Texture(Gdx.files.internal("enemies/ice-golem.png"));
-        enemies[8] = new Texture(Gdx.files.internal("enemies/minotaur.png"));
-        enemies[9] = new Texture(Gdx.files.internal("enemies/shambling-mound.png"));
-        enemies[10] = new Texture(Gdx.files.internal("enemies/skeleton.png"));
-        enemies[11] = new Texture(Gdx.files.internal("enemies/spectre.png"));
-        enemies[12] = new Texture(Gdx.files.internal("enemies/troglodyte.png"));
-        enemies[13] = new Texture(Gdx.files.internal("enemies/werewolf.png"));
+    /**
+     * The player of the current game
+     */
+    private Player player;
 
-        deadEnemy = new Texture(Gdx.files.internal("tombstone.png"));
-        shop = new Texture(Gdx.files.internal("shop.png"));
-        trap = new Texture(Gdx.files.internal("wolf-trap.png"));
+    public GameScreen(GameCore gameCore, SpriteBatch batch) {
+        super(gameCore, batch);
+        // Load textures
+        dungeon = new TextureAtlas("texture_atlases/dungeon.atlas");
+        walls = new Array<>(3);
+        walls.add(dungeon.findRegion("dungeon/brick-wall"));
+        walls.add(dungeon.findRegion("dungeon/broken-wall"));
+        walls.add(dungeon.findRegion("dungeon/stone-wall"));
 
-        // Initialize map
+        exit = dungeon.findRegion("dungeon/dungeon-gate");
+        path = dungeon.findRegion("dungeon/path-tile");
+        dungeon.dispose();
+
+        interactives = new TextureAtlas("texture_atlases/interactives.atlas");
+        playerTexture = interactives.findRegion("player");
+        deadEnemy = interactives.findRegion("dead_enemy");
+        shop = interactives.findRegion("shop");
+        trap = interactives.findRegion("trap");
+
+        enemyAtlas = new TextureAtlas("texture_atlases/enemies.atlas");
+        enemies = enemyAtlas.getRegions();
+/*        enemies[0] = new Texture(Gdx.files.internal("enemies/bully-minion"));
+        enemies[1] = new Texture(Gdx.files.internal("enemies/ceiling-barnacle"));
+        enemies[2] = new Texture(Gdx.files.internal("enemies/evil-bat"));
+        enemies[3] = new Texture(Gdx.files.internal("enemies/evil-minion"));
+        enemies[4] = new Texture(Gdx.files.internal("enemies/gargoyle"));
+        enemies[5] = new Texture(Gdx.files.internal("enemies/gooey-daemon"));
+        enemies[6] = new Texture(Gdx.files.internal("enemies/grim-reaper"));
+        enemies[7] = new Texture(Gdx.files.internal("enemies/ice-golem"));
+        enemies[8] = new Texture(Gdx.files.internal("enemies/minotaur"));
+        enemies[9] = new Texture(Gdx.files.internal("enemies/shambling-mound"));
+        enemies[10] = new Texture(Gdx.files.internal("enemies/skeleton"));
+        enemies[11] = new Texture(Gdx.files.internal("enemies/spectre"));
+        enemies[12] = new Texture(Gdx.files.internal("enemies/troglodyte"));
+        enemies[13] = new Texture(Gdx.files.internal("enemies/werewolf"));
+*/
+        // Create layout
+        // Root
+        Table root = new Table(gameCore.skin);
+        root.setFillParent(true);
+        stage.addActor(root);
+
+        // Left menu
+        Table leftMenu = new Table(gameCore.skin);
+        leftMenu.add(new TextButton("Left Test", gameCore.skin));
+        root.add(leftMenu);
+
+        // Map
         // Display the map as a blue rectangle
         Pixmap rect = new Pixmap(mapWidth, mapHeight, Pixmap.Format.RGB888);
         rect.setColor(0.1f, 0, .5f, 1);
         rect.fill();
         map = new Image(new Texture(rect));
-        map.setPosition(stage.getWidth() / 2 - mapWidth / 2, stage.getHeight() / 2 - mapHeight / 2);
-        stage.addActor(map);
+        root.add(map);
+
+        // Right menu
+        Table rightMenu = new Table(gameCore.skin);
+        rightMenu.add(new TextButton("Right Test", gameCore.skin));
+        root.add(rightMenu);
     }
 
     @Override
@@ -99,83 +150,175 @@ public class GameScreen extends AbstractFixSizedScreen {
     @Override
     public void dispose() {
         super.dispose();
-        for (Texture wall : walls) {
-            wall.dispose();
-        }
-        exit.dispose();
-        path.dispose();
-        player.dispose();
-        for (Texture enemy : enemies) {
-            enemy.dispose();
-        }
-        deadEnemy.dispose();
-        shop.dispose();
-        trap.dispose();
+        dungeon.dispose();
+        interactives.dispose();
+        enemyAtlas.dispose();
     }
 
-//    private static final String[] VERTICAL_WALL = new String[] {"|", "|", "|"};
-//    private static final String HORIZONTAL_WALL = "-----";
-//    private static final String[] EMPTY_FIELD = new String[] { "     ", "     ", "     "};
-//    private static final String[] NO_WALL = new String[] { " ", " ", " "};
-//    private static final String[] PLAYER = new String[] { "  @  ", " (^) ", " / \\ "};
-//    private static final String[] ENEMY = new String[] { " ]_[ ", " -.- ", "  W  "};
-//    private static final String[] DEAD_ENEMY = new String[] { " x x ", "  ^  " ,  " ^^^ "};
-//    private static final String[] NPC = new String[] { "  $  ", " $$$ ", "  $  "};
-//    private static final String[] TRAP = new String[] { "     ", " ^^^ ", "     "};
-//    private static final String OUTSIDE_MAZE = "#";
-//
-//    private static final int ENEMIES_PERCENT = 12;
-//    private static final int NPCS_PERCENT = 6;
-//    private static final int TRAPS_PERCENT = 8;
-//
-//    private Random rnd;
-//
-//    private int width;
-//    private int height;
-//
-//    private int viewDistance;
-//
-//    private Field[][] map;
-//
-//    private Player player;
-//
-//    private Interactive tempInteractive;
-//
-//    private Queue<Enemy> respawnQueue;
-//
-//    boolean firstTrap = true;
-//    boolean firstMonster = true;
-//    boolean firstNPC = true;
-//
-//    /**
-//     * Default constructor for the game class.
-//     */
-//    public GameScreen()
-//    {
-//        rnd = new Random();
-//
-//        width = 20;
-//        height = 10;
-//        viewDistance = 2;
-//        respawnQueue = new LinkedList<>();
-//        respawnQueue.add(null);
-//        respawnQueue.add(null);
-//        respawnQueue.add(null);
-//        respawnQueue.add(null);
-//        respawnQueue.add(null);
-//
-//        player = new Player(width * height / 2);
-//        tempInteractive = null;
-//
-//        player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
-//
-//        map = new Field[width][height];
-//        createMap();
-//
-//        map[player.getX()][player.getY()].setInteractive(player);
-//        generateMapItems();
-//        generateExit();
-//    }
+    // Former game menu
+    /*
+    /**
+     * Game menu, which is displayed after loading a game or starting a new one
+     * /
+    public void gameMenu()
+    {
+        Scanner s = new Scanner(System.in);
+        String input;
+
+        do {
+
+            System.out.println("\nPlease choose one of the following options:");
+            System.out.println("1. Make a move");
+            System.out.println("2. Save the game progress");
+            System.out.println("3. Check your health status");
+            System.out.println("4. Check your inventory");
+            System.out.println("5. Check for traps");
+            System.out.println("0. Exit the game");
+
+            input = s.nextLine();
+
+            switch(input)
+            {
+                case "1":
+                {
+                    boolean canMove = false;
+                    Scanner sc = new Scanner(System.in);
+                    String choice;
+
+
+                    do {
+
+                        if(gameScreen.getPlayer().getOil() < 5)
+                        {
+                            System.out.println("You have run out of oil. The darkness consumes you.");
+                            gameScreen.gameOver();
+                        }
+                        gameScreen.displayMap();
+                        System.out.println("\nChoose your direction of floating:");
+
+                        System.out.println("u   - to go up");
+                        System.out.println("d   - to go down");
+                        System.out.println("l   - to go left");
+                        System.out.println("r   - to go right");
+
+                        System.out.println("\nEach turn consumes oil. You have " + gameScreen.getPlayer().getOil() +" oil left. Make sure it " +
+                                "doesn't run out, otherwise the nightmares might end you.");
+
+                        System.out.println("0   - to return");
+
+                        choice = s.nextLine();
+                        if(choice.equals("0")) break;
+                        canMove = gameScreen.movePlayer(choice);
+
+                        if(canMove)
+                        {
+                            gameScreen.getPlayer().setOil(gameScreen.getPlayer().getOil() - 5);
+                            System.out.println("You have moved.\n");
+                            gameScreen.displayMap();
+                        }
+                        else
+                        {
+                            System.out.println("Moving in that direction is forbidden!");
+                        }
+
+                    } while (!canMove);
+
+                    break;
+                }
+                case "2":
+                    saveGame();
+                    break;
+                case "3":
+                {
+                    System.out.println("You closely focus on your heartbeat.\n");
+                    System.out.println("Your status:");
+
+                    gameScreen.getPlayer().checkStatus();
+                    break;
+                }
+                case "4":
+                {
+                    System.out.println("\nHere is your inventory. Defeat your nightmares or trade to acquire more items.\n");
+                    gameScreen.getPlayer().getInv().showInventory();break;
+                }
+
+                case "5":
+                {
+
+
+                    boolean hasRock = gameScreen.getPlayer().getInv().findInInventory("Rock");
+                    boolean trapExists = false;
+                    if(hasRock)
+                    {
+                        gameScreen.disableTrap();
+                        trapExists = gameScreen.getPlayer().getInv().remove("Rock");
+
+                        if(trapExists)
+                        {
+                            System.out.println("Good job! You have successfully disabled a deadly trap.");
+
+                        }
+                        else
+                        {
+                            System.out.println("There were no traps found. However, you have wasted your rock.");
+                        }
+
+                    }
+                    else
+                    {
+                        System.out.println("You don't have enough rocks to perform this action.");
+                    }
+                    break;
+                }
+
+                case "0": System.out.println("Thank you for playing! See you soon."); System.exit(1);
+                default: System.out.println("Your input is invalid! Please enter an integer from 0 to 5.");
+            }
+
+
+        } while(!(input.equals("0")));
+    }
+    */
+
+    // Variables
+    /*
+    private Field[][] map;
+
+    private Interactive tempInteractive;
+
+    private Queue<Enemy> respawnQueue;
+
+    boolean firstTrap = true;
+    boolean firstMonster = true;
+    boolean firstNPC = true;
+     */
+
+    // Constructor
+    /*
+    public GameScreen()
+    {
+        rnd = new Random();
+
+        respawnQueue = new LinkedList<>();
+        respawnQueue.add(null);
+        respawnQueue.add(null);
+        respawnQueue.add(null);
+        respawnQueue.add(null);
+        respawnQueue.add(null);
+
+        player = new Player(width * height / 2);
+        tempInteractive = null;
+
+        player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
+
+        map = new Field[width][height];
+        createMap();
+
+        map[player.getX()][player.getY()].setInteractive(player);
+        generateMapItems();
+        generateExit();
+    }
+    */
 //
 //    /**
 //     * Randomly generates a maze map using Prim's algorithm.

@@ -1,0 +1,41 @@
+
+dungeon.png
+size: 2048,512
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+brick-wall
+  rotate: false
+  xy: 324, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+broken-wall
+  rotate: false
+  xy: 2, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+dungeon-gate
+  rotate: false
+  xy: 1290, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+path-tile
+  rotate: false
+  xy: 646, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
+stone-wall
+  rotate: false
+  xy: 968, 2
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
