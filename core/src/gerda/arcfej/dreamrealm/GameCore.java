@@ -52,7 +52,8 @@ public class GameCore extends Game {
 		loadGame = new LoadGameScreen(this, batch);
 		howToPlay = new HowToPlayScreen(this, batch);
 
-		showMainMenu();
+// TODO		showMainMenu();
+		startGame();
 	}
 
 	@Override

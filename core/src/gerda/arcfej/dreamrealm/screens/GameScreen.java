@@ -2,21 +2,34 @@ package gerda.arcfej.dreamrealm.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.maps.MapLayers;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectSet;
+import com.badlogic.gdx.utils.OrderedSet;
+import com.badlogic.gdx.utils.Predicate;
+import com.badlogic.gdx.utils.Predicate.PredicateIterator;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import gerda.arcfej.dreamrealm.GameCore;
 import gerda.arcfej.dreamrealm.interactives.Player;
+import gerda.arcfej.dreamrealm.map.Field;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.*;
 
 /**
- * The Game class contains the random map generation,
- * as well as handles the movement of the player
- * and the interaction with the faced objects.
  *
  */
 public class GameScreen extends AbstractFixSizedScreen {
@@ -34,26 +47,36 @@ public class GameScreen extends AbstractFixSizedScreen {
     private Array<AtlasRegion> walls;
     private Array<AtlasRegion> enemies;
     private AtlasRegion exit;
-    private AtlasRegion path;
+    private AtlasRegion pathTexture;
     private AtlasRegion playerTexture;
     private AtlasRegion deadEnemy;
     private AtlasRegion shop;
     private AtlasRegion trap;
 
     /**
-     * The map to display
+     * The visual representation of the maze
      */
-    private Image map;
+    private TiledMap map;
 
     /**
-     * Width of the map
+     * The camera the map is displayed through
      */
-    private final int mapWidth = 450;
+    private OrthographicCamera camera;
 
     /**
-     * Height of the map
+     * Width of the map on the screen
      */
-    private final int mapHeight = 450;
+    private final int cameraWidth = 675;
+
+    /**
+     * Height of the map on the screen
+     */
+    private final int cameraHeight = 675;
+
+    /**
+     * Responsible to render the map on the screen
+     */
+    private TiledMapRenderer mapRenderer;
 
     /**
      * For map generation
@@ -61,14 +84,22 @@ public class GameScreen extends AbstractFixSizedScreen {
     private int enemiesPercent= 12;
     private int shopsPercent = 6;
     private int trapsPercent = 8;
+    private int mazeWidth = 10;
+    private int mazeHeight = 10;
+    private int tileSize = 320;
     // Number of tiles
-    private int width = 20;
-    private int height = 20;
+    private int mapWidth = mazeWidth * 2 + 1;
+    private int mapHeight = mazeHeight * 2 + 1;
 
     /**
      * For map displaying
      */
     private int viewDistance = 2;
+
+    /**
+     * The data representation of the maze
+     */
+    private Field[][] mazeData;
 
     /**
      * The player of the current game
@@ -80,13 +111,12 @@ public class GameScreen extends AbstractFixSizedScreen {
         // Load textures
         dungeon = new TextureAtlas("texture_atlases/dungeon.atlas");
         walls = new Array<>(3);
-        walls.add(dungeon.findRegion("dungeon/brick-wall"));
-        walls.add(dungeon.findRegion("dungeon/broken-wall"));
-        walls.add(dungeon.findRegion("dungeon/stone-wall"));
+        walls.add(dungeon.findRegion("stone-wall"));
+        walls.add(dungeon.findRegion("brick-wall"));
+        walls.add(dungeon.findRegion("broken-wall"));
 
-        exit = dungeon.findRegion("dungeon/dungeon-gate");
-        path = dungeon.findRegion("dungeon/path-tile");
-        dungeon.dispose();
+        exit = dungeon.findRegion("dungeon-gate");
+        pathTexture = dungeon.findRegion("path-tile");
 
         interactives = new TextureAtlas("texture_atlases/interactives.atlas");
         playerTexture = interactives.findRegion("player");
@@ -96,6 +126,18 @@ public class GameScreen extends AbstractFixSizedScreen {
 
         enemyAtlas = new TextureAtlas("texture_atlases/enemies.atlas");
         enemies = enemyAtlas.getRegions();
+
+        player = new Player(mazeWidth * mazeHeight / 2);
+        // Place the player on the map at a random place
+        player.setPosition(MathUtils.random(mazeWidth - 1), MathUtils.random(mazeHeight - 1));
+
+        // Create the map and its layers
+        map = new TiledMap();
+        createMapLayers();
+
+        mazeData = new Field[mazeWidth][mazeHeight];
+        generateMaze();
+
 /*        enemies[0] = new Texture(Gdx.files.internal("enemies/bully-minion"));
         enemies[1] = new Texture(Gdx.files.internal("enemies/ceiling-barnacle"));
         enemies[2] = new Texture(Gdx.files.internal("enemies/evil-bat"));
@@ -111,6 +153,7 @@ public class GameScreen extends AbstractFixSizedScreen {
         enemies[12] = new Texture(Gdx.files.internal("enemies/troglodyte"));
         enemies[13] = new Texture(Gdx.files.internal("enemies/werewolf"));
 */
+
         // Create layout
         // Root
         Table root = new Table(gameCore.skin);
@@ -119,16 +162,43 @@ public class GameScreen extends AbstractFixSizedScreen {
 
         // Left menu
         Table leftMenu = new Table(gameCore.skin);
-        leftMenu.add(new TextButton("Left Test", gameCore.skin));
+        TextButton generate = new TextButton("Generate Map", gameCore.skin);
+        generate.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                generateMaze();
+            }
+        });
+        leftMenu.add(generate);
         root.add(leftMenu);
 
         // Map
-        // Display the map as a blue rectangle
-        Pixmap rect = new Pixmap(mapWidth, mapHeight, Pixmap.Format.RGB888);
-        rect.setColor(0.1f, 0, .5f, 1);
-        rect.fill();
-        map = new Image(new Texture(rect));
-        root.add(map);
+        float w = Gdx.graphics.getWidth();
+        float h = Gdx.graphics.getHeight();
+        // Set screen ratio
+        if (h > w) {
+            camera = new OrthographicCamera(cameraWidth, cameraHeight * (h / w));
+        } else {
+            camera = new OrthographicCamera(cameraWidth * w / h, cameraHeight);
+        }
+        // Set zoom based on view distance
+        camera.zoom = tileSize / camera.viewportHeight * 21/*(viewDistance * 2 + 1)*/;
+        // Center the map on the player
+        // TODO uncomment this and comment out the other
+//        camera.position.set((player.getX() * 2 + 1) * tileSize + tileSize / 2f,
+//                (player.getY() * 2 + 1) * tileSize + tileSize / 2f,
+//                0);
+        camera.position.set(mapWidth * tileSize / 2f,
+                mapHeight * tileSize / 2f,
+                0);
+        camera.update();
+        mapRenderer = new OrthogonalTiledMapRenderer(map, batch);
+        root.add(new Image(new Texture(new Pixmap(cameraWidth, cameraHeight, Pixmap.Format.Alpha))));
 
         // Right menu
         Table rightMenu = new Table(gameCore.skin);
@@ -145,6 +215,10 @@ public class GameScreen extends AbstractFixSizedScreen {
 
         stage.act();
         stage.draw();
+
+        camera.update();
+        mapRenderer.setView(camera);
+        mapRenderer.render();
     }
 
     @Override
@@ -153,6 +227,156 @@ public class GameScreen extends AbstractFixSizedScreen {
         dungeon.dispose();
         interactives.dispose();
         enemyAtlas.dispose();
+    }
+
+    private void createMapLayers() {
+        MapLayers layers = map.getLayers();
+        TiledMapTileLayer background = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
+        background.setName("background");
+        TiledMapTileLayer dungeon = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
+        dungeon.setName("dungeon");
+        TiledMapTileLayer interactives = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
+        interactives.setName("interactives");
+        TiledMapTileLayer player = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
+        player.setName("player");
+
+        layers.add(background);
+        layers.add(dungeon);
+        layers.add(interactives);
+        layers.add(player);
+    }
+
+    // Maze generation
+    // Uses Prim's algorithm to generate a map. All the edges have the same weight, so the next neighbour are chosen randomly.
+    private void generateMaze() {
+        // A 2D array of fields which will become a maze.
+        // Fill it up with empty fields, non of them part of the actual maze yet.
+        for (int i = 0; i < mazeWidth; i++) {
+            for (int j = 0; j < mazeHeight; j++) {
+                Field field = new Field();
+                mazeData[i][j] = field;
+                field.setPosition(i, j);
+            }
+        }
+
+        // A set of fields which are part of a maze. Empty before the maze generation.
+        ObjectSet<Field> inside = new ObjectSet<>(mazeWidth * mazeHeight);
+        // A set of fields at the edge of the already generated maze. (Neighbour fields around the maze)
+        // It will become empty at the end of the generation, when all the map's fields will be part of the maze.
+        OrderedSet<Field> neighbours = new OrderedSet<>(mazeWidth * mazeHeight / 2);
+
+        // Start the maze generation from a random point and add it to the maze (in) as its first field
+        int x = MathUtils.random(mazeWidth - 1);
+        int y = MathUtils.random(mazeHeight - 1);
+        Field newPath = mazeData[x][y];
+        inside.add(newPath);
+        do {
+            // An array of fields adjacent to the previous new path (max 4)
+            Array<Field> adjacents = new Array<>(false, 4);
+            // Try to add all the adjacent fields to the array. IndexOutOfBound exceptions are ignored.
+            try {
+                adjacents.add(mazeData[x - 1][y]);
+            } catch (Exception ignore) { }
+            try {
+                adjacents.add(mazeData[x + 1][y]);
+            } catch (Exception ignore) { }
+            try {
+                adjacents.add(mazeData[x][y - 1]);
+            } catch (Exception ignore) { }
+            try {
+                adjacents.add(mazeData[x][y + 1]);
+            } catch (Exception ignore) { }
+            // Add the new path's adjacent fields to the neighbours of the maze, if they're not already part of the maze.
+            for (Field next : adjacents) {
+                if (!inside.contains(next)) {
+                    neighbours.add(next);
+                }
+            }
+            Field previousPath = newPath;
+
+            // Choose one random neighbour as the next new path
+            newPath = neighbours.removeIndex(MathUtils.random(neighbours.size - 1));
+            x = newPath.getX();
+            y = newPath.getY();
+
+            // Predicates to determine if a field is left, right, up or down to the newly added path.
+            Field finalNewPath = newPath;
+            Predicate<Field> isLeft = field -> field.getY() == finalNewPath.getY() && field.getX() + 1 == finalNewPath.getX();
+            Predicate<Field> isRight = field -> field.getY() == finalNewPath.getY() && field.getX() - 1 == finalNewPath.getX();
+            Predicate<Field> isUp = field -> field.getX() == finalNewPath.getX() && field.getY() - 1 == finalNewPath.getY();
+            Predicate<Field> isDown = field -> field.getX() == finalNewPath.getX() && field.getY() + 1 == finalNewPath.getY();
+            // Combine these predicates
+            Predicate<Field> isNeighbour = field ->
+                    isLeft.evaluate(field) || isRight.evaluate(field) || isUp.evaluate(field) || isDown.evaluate(field);
+
+            // Find a random neighbour (the first one)
+            PredicateIterator<Field> neighbourFilter = new PredicateIterator<>(inside, isNeighbour);
+            Field connect = neighbourFilter.next();
+
+            // Open the connection between the new path and (one of) the neighbouring maze cell then add it to the maze
+            if (isUp.evaluate(connect)) {
+                connect.setDown(true);
+                newPath.setUp(true);
+            } else if (isDown.evaluate(connect)) {
+                connect.setUp(true);
+                newPath.setDown(true);
+            } else if (isRight.evaluate(connect)) {
+                connect.setLeft(true);
+                newPath.setRight(true);
+            } else if (isLeft.evaluate(connect)) {
+                connect.setRight(true);
+                newPath.setLeft(true);
+            }
+            inside.add(newPath);
+        } while (!neighbours.isEmpty()); // Run until there's no more empty fields left
+
+        // Set the graphics
+        TiledMapTileLayer dungeon = (TiledMapTileLayer) map.getLayers().get("dungeon");
+        // Create the bottom and left side of the maze, full of walls
+        for (y = 0; y < dungeon.getHeight(); y++) {
+            TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+            cell.setTile(new StaticTiledMapTile(walls.get(MathUtils.random(walls.size - 1))))
+                    .setRotation(TiledMapTileLayer.Cell.ROTATE_270);
+            dungeon.setCell(0, y, cell);
+        }
+        for (x = 1; x < dungeon.getWidth(); x++) {
+            TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+            cell.setTile(new StaticTiledMapTile(walls.get(MathUtils.random(walls.size - 1))));
+            dungeon.setCell(x, 0, cell);
+        }
+
+        // Go through the maze and fill the map up with walls
+        for (x = 0; x < mazeData.length; x++) {
+            Field[] row = mazeData[x];
+            for (y = 0; y < row.length; y++) {
+                Field path = row[y];
+
+                // Set texture on the path
+                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                cell.setTile(new StaticTiledMapTile(pathTexture));
+                dungeon.setCell(x * 2 + 1, y * 2 + 1, cell);
+
+                // Set a wall or path on the top
+                TiledMapTileLayer.Cell up = new TiledMapTileLayer.Cell();
+                up.setTile(new StaticTiledMapTile(
+                        path.canUp() ? pathTexture : walls.get(MathUtils.random(walls.size - 1))));
+                dungeon.setCell(x * 2 + 1, y * 2 + 2, up);
+
+                // Set a wall or path on the right
+                TiledMapTileLayer.Cell right = new TiledMapTileLayer.Cell();
+                right.setTile(new StaticTiledMapTile(
+                        path.canRight() ? pathTexture : walls.get(MathUtils.random(walls.size - 1))));
+                // Randomize rotation on the right
+                right.setRotation(MathUtils.randomBoolean() ? TiledMapTileLayer.Cell.ROTATE_90 :TiledMapTileLayer.Cell.ROTATE_270);
+                dungeon.setCell(x * 2 + 2, y * 2 + 1, right);
+
+                // Set the wall in the top-right corner to the path
+                TiledMapTileLayer.Cell upRight = new TiledMapTileLayer.Cell();
+                upRight.setTile(new StaticTiledMapTile(walls.get(MathUtils.random(walls.size - 1))));
+                upRight.setRotation(MathUtils.randomBoolean() ? TiledMapTileLayer.Cell.ROTATE_90 :TiledMapTileLayer.Cell.ROTATE_270);
+                dungeon.setCell(x * 2 + 2, y * 2 + 2, upRight);
+            }
+        }
     }
 
     // Former game menu
@@ -282,8 +506,6 @@ public class GameScreen extends AbstractFixSizedScreen {
 
     // Variables
     /*
-    private Field[][] map;
-
     private Interactive tempInteractive;
 
     private Queue<Enemy> respawnQueue;
@@ -297,8 +519,6 @@ public class GameScreen extends AbstractFixSizedScreen {
     /*
     public GameScreen()
     {
-        rnd = new Random();
-
         respawnQueue = new LinkedList<>();
         respawnQueue.add(null);
         respawnQueue.add(null);
@@ -306,255 +526,187 @@ public class GameScreen extends AbstractFixSizedScreen {
         respawnQueue.add(null);
         respawnQueue.add(null);
 
-        player = new Player(width * height / 2);
         tempInteractive = null;
-
-        player.setPosition(rnd.nextInt(width), rnd.nextInt(height));
-
-        map = new Field[width][height];
-        createMap();
 
         map[player.getX()][player.getY()].setInteractive(player);
         generateMapItems();
         generateExit();
     }
     */
-//
-//    /**
-//     * Randomly generates a maze map using Prim's algorithm.
-//     */
-//    private void createMap() {
-//        Set<Field> in = new HashSet<>(width * height);
-//        List<Field> neighbors = new ArrayList<>(width * height / 2);
-//
-//        for (int i = 0; i < width; i++) {
-//            for (int j = 0; j < height; j++) {
-//                Field field = new Field();
-//                map[i][j] = field;
-//                field.setPosition(i, j);
-//            }
-//        }
-//
-//        int x = player.getX();
-//        int y = player.getY();
-//        Field newIn = map[x][y];
-//        in.add(newIn);
-//        do {
-//            List<Field> nexts = new ArrayList<>(4);
-//            try {
-//                nexts.add(map[x - 1][y]);
-//            } catch (Exception ignore) { }
-//            try {
-//                nexts.add(map[x + 1][y]);
-//            } catch (Exception ignore) { }
-//            try {
-//                nexts.add(map[x][y - 1]);
-//            } catch (Exception ignore) { }
-//            try {
-//                nexts.add(map[x][y + 1]);
-//            } catch (Exception ignore) { }
-//            for (Field next : nexts) {
-//                if (!in.contains(next)) {
-//                    neighbors.add(next);
-//                }
-//            }
-//            newIn = neighbors.remove(rnd.nextInt(neighbors.size()));
-//            x = newIn.getX();
-//            y = newIn.getY();
-//
-//            Field finalNewIn = newIn;
-//            // Is field left against newIn?
-//            Predicate<Field> left = field -> field.getY() == finalNewIn.getY() && field.getX() + 1 == finalNewIn.getX();
-//            // is field right against newIn
-//            Predicate<Field> right = field -> field.getY() == finalNewIn.getY() && field.getX() - 1 == finalNewIn.getX();
-//            Predicate<Field> up = field -> field.getX() == finalNewIn.getX() && field.getY() + 1 == finalNewIn.getY();
-//            Predicate<Field> down = field -> field.getX() == finalNewIn.getX() && field.getY() - 1 == finalNewIn.getY();
-//            Field connect = in.stream()
-//                    .filter(left.or(right).or(up).or(down))
-//                    .findFirst()
-//                    .orElse(null);
-//            assert connect != null;
-//            // is connect up against newIn
-//            if (up.test(connect)) {
-//                connect.setDown(true);
-//                newIn.setUp(true);
-//            } else if (down.test(connect)) {
-//                connect.setUp(true);
-//                newIn.setDown(true);
-//            } else if (right.test(connect)) {
-//                connect.setLeft(true);
-//                newIn.setRight(true);
-//            } else if (left.test(connect)) {
-//                connect.setRight(true);
-//                newIn.setLeft(true);
-//            }
-//            in.add(newIn);
-//        } while (!neighbors.isEmpty());
-//    }
-//
-//    private int enemyNum;
-//    private int npcNum;
-//    private int trapNum;
-//
-//    private void generateMapItems() {
-//        float max = (width % 2 == 0 ? width : width + 1) * (height % 2 == 0 ? height : height + 1);
-//        enemyNum = (int) Math.round(max * ENEMIES_PERCENT / 100);
-//        npcNum = (int) Math.round(max * NPCS_PERCENT / 100);
-//        trapNum = (int) Math.round(max * TRAPS_PERCENT / 100);
-//
-//        for (int i = 0; i < width; i += 2) {
-//            for (int j = 0; j < height; j += 2) {
-//                placeInteractive(
-//                        i,
-//                        Math.min(i + 2, width),
-//                        j,
-//                        Math.min(j + 2, height)
-//                );
-//            }
-//        }
-//        while (enemyNum + npcNum + trapNum > 0) {
-//            placeInteractive(0, width, 0, height);
-//        }
-//    }
-//
-//    private void placeInteractive(int xMin, int xMax, int yMin, int yMax) {
-//        Interactive interactive = null;
-//        int x = 0;
-//        int y = 0;
-//        boolean allowed = false;
-//
-//        int errorCount = 0;
-//
-//        while (!allowed) {
-//            do {
-//                x = rnd.nextInt(xMax - xMin) + xMin;
-//                y = rnd.nextInt(yMax - yMin) + yMin;
-//            } while (map[x][y].getInteractive() != null);
-//            switch (rnd.nextInt(3)) {
-//                case 0:
-//                    interactive = enemyNum > 0 ? new Enemy() : null;
-//                    break;
-//                case 1:
-//                    interactive = npcNum > 0 ? new NPC() : null;
-//                    break;
-//                case 2:
-//                    interactive = trapNum > 0 ? new Trap() : null;
-//            }
-//            allowed = isPlacementAllowed(interactive, x, y);
-//            errorCount++;
-//            if (errorCount > 10) {
-//                break;
-//            }
-//        }
-//        if (errorCount <= 10) {
-//            interactive.setPosition(x, y);
-//        }
-//        map[x][y].setInteractive(interactive);
-//        if (interactive instanceof Enemy) enemyNum--;
-//        else if (interactive instanceof NPC) npcNum--;
-//        else if (interactive instanceof Trap) trapNum--;
-//    }
-//
-//    private boolean isPlacementAllowed(Interactive interactive, int x, int y) {
-//        if (interactive == null) {
-//            return false;
-//        }
-//        int count = 0;
-//        for (int i = (x == 0 ? x : x - 1); i <= (x >= width ? width - 1 : x); i++) {
-//            for (int j = (y == 0 ? y : y - 1); j <= (j >= height ? height - 1 : j); j++) {
-//                Interactive existing = map[i][j].getInteractive();
-//                if (existing != null) {
-//                    count++;
-//                    if (interactive.getClass().equals(existing.getClass())) {
-//                        return false;
-//                    }
-//                }
-//            }
-//        }
-//        return count < 2;
-//    }
-//
-//    private void generateExit() {
-//        boolean top = player.getY() % (width / 2) == 0;
-//        int x = rnd.nextInt(width);
-//        if (top) {
-//            map[x][0].setUp(true);
-//        } else {
-//            map[x][height - 1].setDown(true);
-//        }
-//    }
-//
-//    public void displayMap() {
-//        for (int j = player.getY() - viewDistance; j <= player.getY() + viewDistance; j++) {
-//            displayRowUpperBorders(j);
-//            displayDataRow(j);
-//            if (j == player.getY() + viewDistance || j == height - 1) {
-//                displayRowBottomBorders(j);
-//            }
-//        }
-//    }
-//
-//    private void displayDataRow(int row) {
-//        for (int j = 0; j < 3; j++) {
-//            String line = "";
-//            for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
-//                Field field;
-//                String[] side;
-//                String[] middle;
-//                try {
-//                    field = map[i][row];
-//                    side = field.canLeft() ? NO_WALL : VERTICAL_WALL;
-//                    middle = getInteractiveChar(field.getInteractive());
-//                    line = line.concat(side[j] + middle[j]);
-//                    if (i == player.getX() + viewDistance || i == width - 1) {
-//                        line = line.concat(field.canRight() ? NO_WALL[j] : VERTICAL_WALL[j]);
-//                    }
-//                } catch (IndexOutOfBoundsException e) {
-//                    line = line.concat(outsideMazeCell());
-//                }
-//            }
-//            System.out.println(line);
-//        }
-//    }
-//
-//    private void displayRowUpperBorders(int row) {
-//        for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
-//            try {
-//                Field field = map[i][row];
-//                String side = VERTICAL_WALL[1];
-//                String middle = field.canUp() ? EMPTY_FIELD[1] : HORIZONTAL_WALL;
-//                System.out.print(side + middle);
-//                if (i == player.getX() + viewDistance || i == width - 1) {
-//                    System.out.print(VERTICAL_WALL[1]);
-//                }
-//            } catch (IndexOutOfBoundsException e) {
-//                System.out.print(outsideMazeCell());
-//            }
-//        }
-//        System.out.println();
-//    }
-//
-//    private void displayRowBottomBorders(int row) {
-//        for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
-//            try {
-//                Field field = map[i][row];
-//                String side = VERTICAL_WALL[1];
-//                String middle = field.canDown() ? EMPTY_FIELD[1] : HORIZONTAL_WALL;
-//                System.out.print(side + middle);
-//                if (i == player.getX() + viewDistance || i == width - 1) {
-//                    System.out.print(VERTICAL_WALL[1]);
-//                }
-//            } catch (IndexOutOfBoundsException e) {
-//                System.out.print(outsideMazeCell());
-//            }
-//        }
-//        System.out.println();
-//    }
-//
-//    private String outsideMazeCell() {
-//        return StringUtils.repeat(OUTSIDE_MAZE, EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length());
-//    }
-//
+
+    // Generate map items
+    /*
+    private int enemyNum;
+    private int npcNum;
+    private int trapNum;
+
+    private void generateMapItems() {
+        float max = (width % 2 == 0 ? width : width + 1) * (height % 2 == 0 ? height : height + 1);
+        enemyNum = (int) Math.round(max * ENEMIES_PERCENT / 100);
+        npcNum = (int) Math.round(max * NPCS_PERCENT / 100);
+        trapNum = (int) Math.round(max * TRAPS_PERCENT / 100);
+
+        for (int i = 0; i < width; i += 2) {
+            for (int j = 0; j < height; j += 2) {
+                placeInteractive(
+                        i,
+                        Math.min(i + 2, width),
+                        j,
+                        Math.min(j + 2, height)
+                );
+            }
+        }
+        while (enemyNum + npcNum + trapNum > 0) {
+            placeInteractive(0, width, 0, height);
+        }
+    }
+
+    private void placeInteractive(int xMin, int xMax, int yMin, int yMax) {
+        Interactive interactive = null;
+        int x = 0;
+        int y = 0;
+        boolean allowed = false;
+
+        int errorCount = 0;
+
+        while (!allowed) {
+            do {
+                x = rnd.nextInt(xMax - xMin) + xMin;
+                y = rnd.nextInt(yMax - yMin) + yMin;
+            } while (map[x][y].getInteractive() != null);
+            switch (rnd.nextInt(3)) {
+                case 0:
+                    interactive = enemyNum > 0 ? new Enemy() : null;
+                    break;
+                case 1:
+                    interactive = npcNum > 0 ? new NPC() : null;
+                    break;
+                case 2:
+                    interactive = trapNum > 0 ? new Trap() : null;
+            }
+            allowed = isPlacementAllowed(interactive, x, y);
+            errorCount++;
+            if (errorCount > 10) {
+                break;
+            }
+        }
+        if (errorCount <= 10) {
+            interactive.setPosition(x, y);
+        }
+        map[x][y].setInteractive(interactive);
+        if (interactive instanceof Enemy) enemyNum--;
+        else if (interactive instanceof NPC) npcNum--;
+        else if (interactive instanceof Trap) trapNum--;
+    }
+
+    private boolean isPlacementAllowed(Interactive interactive, int x, int y) {
+        if (interactive == null) {
+            return false;
+        }
+        int count = 0;
+        for (int i = (x == 0 ? x : x - 1); i <= (x >= width ? width - 1 : x); i++) {
+            for (int j = (y == 0 ? y : y - 1); j <= (j >= height ? height - 1 : j); j++) {
+                Interactive existing = map[i][j].getInteractive();
+                if (existing != null) {
+                    count++;
+                    if (interactive.getClass().equals(existing.getClass())) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return count < 2;
+    }
+     */
+
+    // Generate exit
+    /*
+    private void generateExit() {
+        boolean top = player.getY() % (width / 2) == 0;
+        int x = rnd.nextInt(width);
+        if (top) {
+            map[x][0].setUp(true);
+        } else {
+            map[x][height - 1].setDown(true);
+        }
+    }
+     */
+
+    // Display map
+    /*
+    public void displayMap() {
+        for (int j = player.getY() - viewDistance; j <= player.getY() + viewDistance; j++) {
+            displayRowUpperBorders(j);
+            displayDataRow(j);
+            if (j == player.getY() + viewDistance || j == height - 1) {
+                displayRowBottomBorders(j);
+            }
+        }
+    }
+
+    private void displayDataRow(int row) {
+        for (int j = 0; j < 3; j++) {
+            String line = "";
+            for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
+                Field field;
+                String[] side;
+                String[] middle;
+                try {
+                    field = map[i][row];
+                    side = field.canLeft() ? NO_WALL : VERTICAL_WALL;
+                    middle = getInteractiveChar(field.getInteractive());
+                    line = line.concat(side[j] + middle[j]);
+                    if (i == player.getX() + viewDistance || i == width - 1) {
+                        line = line.concat(field.canRight() ? NO_WALL[j] : VERTICAL_WALL[j]);
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    line = line.concat(outsideMazeCell());
+                }
+            }
+            System.out.println(line);
+        }
+    }
+
+    private void displayRowUpperBorders(int row) {
+        for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
+            try {
+                Field field = map[i][row];
+                String side = VERTICAL_WALL[1];
+                String middle = field.canUp() ? EMPTY_FIELD[1] : HORIZONTAL_WALL;
+                System.out.print(side + middle);
+                if (i == player.getX() + viewDistance || i == width - 1) {
+                    System.out.print(VERTICAL_WALL[1]);
+                }
+            } catch (IndexOutOfBoundsException e) {
+                System.out.print(outsideMazeCell());
+            }
+        }
+        System.out.println();
+    }
+
+    private void displayRowBottomBorders(int row) {
+        for (int i = player.getX() - viewDistance; i <= player.getX() + viewDistance; i++) {
+            try {
+                Field field = map[i][row];
+                String side = VERTICAL_WALL[1];
+                String middle = field.canDown() ? EMPTY_FIELD[1] : HORIZONTAL_WALL;
+                System.out.print(side + middle);
+                if (i == player.getX() + viewDistance || i == width - 1) {
+                    System.out.print(VERTICAL_WALL[1]);
+                }
+            } catch (IndexOutOfBoundsException e) {
+                System.out.print(outsideMazeCell());
+            }
+        }
+        System.out.println();
+    }
+
+    private String outsideMazeCell() {
+        return StringUtils.repeat(OUTSIDE_MAZE, EMPTY_FIELD[1].length() + VERTICAL_WALL[1].length());
+    }
+     */
+
+
 //    private String[] getInteractiveChar(Interactive interactive) {
 //        if (interactive instanceof Player) {
 //            return PLAYER;
@@ -1224,6 +1376,4 @@ public class GameScreen extends AbstractFixSizedScreen {
 //        System.exit(1);
 //
 //    }
-
-
 }

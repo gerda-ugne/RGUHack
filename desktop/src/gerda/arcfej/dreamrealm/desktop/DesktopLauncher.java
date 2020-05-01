@@ -12,7 +12,7 @@ public class DesktopLauncher {
 		// TODO solve fullScreenMode (alt + tab)
 //		config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
 		config.setResizable(false);
-		config.setWindowedMode(800, 480);
+		config.setWindowedMode(1200, 720);
 
 		new Lwjgl3Application(new GameCore(), config);
 	}
