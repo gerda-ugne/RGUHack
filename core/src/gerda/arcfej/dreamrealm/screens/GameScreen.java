@@ -14,17 +14,19 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.OrderedSet;
 import com.badlogic.gdx.utils.Predicate;
 import com.badlogic.gdx.utils.Predicate.PredicateIterator;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import gerda.arcfej.dreamrealm.GameCore;
-import gerda.arcfej.dreamrealm.interactives.Player;
+import gerda.arcfej.dreamrealm.interactives.*;
 import gerda.arcfej.dreamrealm.map.Field;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.*;
@@ -64,14 +66,19 @@ public class GameScreen extends AbstractFixSizedScreen {
     private OrthographicCamera camera;
 
     /**
+     * The area the map will be drawn in
+     */
+    private Image mapArea;
+
+    /**
      * Width of the map on the screen
      */
-    private final int cameraWidth = 675;
+    private final int mapAreaWidth = 675;
 
     /**
      * Height of the map on the screen
      */
-    private final int cameraHeight = 675;
+    private final int mapAreaHeight = 675;
 
     /**
      * Responsible to render the map on the screen
@@ -106,30 +113,16 @@ public class GameScreen extends AbstractFixSizedScreen {
      */
     private Player player;
 
+    /**
+     * For interactives generation
+     */
+    private static final int ENEMIES_PERCENT = 12;
+    private static final int NPCS_PERCENT = 6;
+    private static final int TRAPS_PERCENT = 8;
+
     public GameScreen(GameCore gameCore, SpriteBatch batch) {
         super(gameCore, batch);
-        // Load textures
-        dungeon = new TextureAtlas("texture_atlases/dungeon.atlas");
-        walls = new Array<>(3);
-        walls.add(dungeon.findRegion("stone-wall"));
-        walls.add(dungeon.findRegion("brick-wall"));
-        walls.add(dungeon.findRegion("broken-wall"));
-
-        exit = dungeon.findRegion("dungeon-gate");
-        pathTexture = dungeon.findRegion("path-tile");
-
-        interactives = new TextureAtlas("texture_atlases/interactives.atlas");
-        playerTexture = interactives.findRegion("player");
-        deadEnemy = interactives.findRegion("dead_enemy");
-        shop = interactives.findRegion("shop");
-        trap = interactives.findRegion("trap");
-
-        enemyAtlas = new TextureAtlas("texture_atlases/enemies.atlas");
-        enemies = enemyAtlas.getRegions();
-
-        player = new Player(mazeWidth * mazeHeight / 2);
-        // Place the player on the map at a random place
-        player.setPosition(MathUtils.random(mazeWidth - 1), MathUtils.random(mazeHeight - 1));
+        loadTextures();
 
         // Create the map and its layers
         map = new TiledMap();
@@ -137,6 +130,17 @@ public class GameScreen extends AbstractFixSizedScreen {
 
         mazeData = new Field[mazeWidth][mazeHeight];
         generateMaze();
+
+        player = new Player(mazeWidth * mazeHeight / 2);
+        // Place the player on the map at a random place
+        player.setPosition(MathUtils.random(mazeWidth - 1), MathUtils.random(mazeHeight - 1));
+        mazeData[player.getX()][player.getY()].setInteractive(player);
+        TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+        cell.setTile(new StaticTiledMapTile(playerTexture));
+        ((TiledMapTileLayer) map.getLayers().get("player"))
+                .setCell(player.getX() * 2 + 1, player.getY() * 2 + 1, cell);
+
+        generateInteractives();
 
 /*        enemies[0] = new Texture(Gdx.files.internal("enemies/bully-minion"));
         enemies[1] = new Texture(Gdx.files.internal("enemies/ceiling-barnacle"));
@@ -171,7 +175,18 @@ public class GameScreen extends AbstractFixSizedScreen {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                map = new TiledMap();
+                createMapLayers();
                 generateMaze();
+                player.setPosition(MathUtils.random(mazeWidth - 1), MathUtils.random(mazeHeight - 1));
+                mazeData[player.getX()][player.getY()].setInteractive(player);
+                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                cell.setTile(new StaticTiledMapTile(playerTexture));
+                ((TiledMapTileLayer) map.getLayers().get("player"))
+                        .setCell(player.getX() * 2 + 1, player.getY() * 2 + 1, cell);
+                generateInteractives();
+
+                mapRenderer = new OrthogonalTiledMapRenderer(map, batch);
             }
         });
         leftMenu.add(generate);
@@ -182,9 +197,9 @@ public class GameScreen extends AbstractFixSizedScreen {
         float h = Gdx.graphics.getHeight();
         // Set screen ratio
         if (h > w) {
-            camera = new OrthographicCamera(cameraWidth, cameraHeight * (h / w));
+            camera = new OrthographicCamera(mapAreaWidth, mapAreaHeight * (h / w));
         } else {
-            camera = new OrthographicCamera(cameraWidth * w / h, cameraHeight);
+            camera = new OrthographicCamera(mapAreaWidth * w / h, mapAreaHeight);
         }
         // Set zoom based on view distance
         camera.zoom = tileSize / camera.viewportHeight * 21/*(viewDistance * 2 + 1)*/;
@@ -198,7 +213,8 @@ public class GameScreen extends AbstractFixSizedScreen {
                 0);
         camera.update();
         mapRenderer = new OrthogonalTiledMapRenderer(map, batch);
-        root.add(new Image(new Texture(new Pixmap(cameraWidth, cameraHeight, Pixmap.Format.Alpha))));
+        mapArea = new Image(new Texture(new Pixmap(mapAreaWidth, mapAreaHeight, Pixmap.Format.Alpha)));
+        root.add(mapArea);
 
         // Right menu
         Table rightMenu = new Table(gameCore.skin);
@@ -213,12 +229,26 @@ public class GameScreen extends AbstractFixSizedScreen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // Draw layout with buttons, menus, etc.
         stage.act();
         stage.draw();
 
+        // Draw map
         camera.update();
-        mapRenderer.setView(camera);
-        mapRenderer.render();
+        // Clip map to a square
+//        Vector2 mapCoordinates = mapArea.localToStageCoordinates(new Vector2(mapArea.getX(), mapArea.getY()));
+//        Rectangle scissors = new Rectangle();
+//        ScissorStack.calculateScissors(camera,
+//                stage.getBatch().getTransformMatrix(),
+//                new Rectangle(mapCoordinates.x, mapCoordinates.y, mapArea.getWidth(), mapArea.getHeight()),
+//                scissors);
+//        if (ScissorStack.pushScissors(scissors)) {
+            // Draw the map inside the rectangle area
+            mapRenderer.setView(camera);
+            mapRenderer.render();
+//            stage.getBatch().flush();
+//            ScissorStack.popScissors();
+//        }
     }
 
     @Override
@@ -227,6 +257,26 @@ public class GameScreen extends AbstractFixSizedScreen {
         dungeon.dispose();
         interactives.dispose();
         enemyAtlas.dispose();
+    }
+
+    private void loadTextures() {
+        dungeon = new TextureAtlas("texture_atlases/dungeon.atlas");
+        walls = new Array<>(3);
+        walls.add(dungeon.findRegion("stone-wall"));
+        walls.add(dungeon.findRegion("brick-wall"));
+        walls.add(dungeon.findRegion("broken-wall"));
+
+        exit = dungeon.findRegion("dungeon-gate");
+        pathTexture = dungeon.findRegion("path-tile");
+
+        interactives = new TextureAtlas("texture_atlases/interactives.atlas");
+        playerTexture = interactives.findRegion("player");
+        deadEnemy = interactives.findRegion("dead_enemy");
+        shop = interactives.findRegion("shop");
+        trap = interactives.findRegion("trap");
+
+        enemyAtlas = new TextureAtlas("texture_atlases/enemies.atlas");
+        enemies = enemyAtlas.getRegions();
     }
 
     private void createMapLayers() {
@@ -379,6 +429,127 @@ public class GameScreen extends AbstractFixSizedScreen {
         }
     }
 
+    private int enemyNum;
+    private int npcNum;
+    private int trapNum;
+
+    private void generateInteractives() {
+        // Use the maze's dimensions or one bigger number if they're odd
+        float maxInteractives = (mazeWidth % 2 == 0 ? mazeWidth : mazeWidth + 1) * (mazeHeight % 2 == 0 ? mazeHeight : mazeHeight + 1);
+        enemyNum = MathUtils.round(maxInteractives * ENEMIES_PERCENT / 100);
+        npcNum = MathUtils.round(maxInteractives * NPCS_PERCENT / 100);
+        trapNum = MathUtils.round(maxInteractives * TRAPS_PERCENT / 100);
+
+        // Go through the maze by 2x2 square areas and place an interactive in every one of them
+        for (int i = 0; i < mazeWidth; i += 2) {
+            for (int j = 0; j < mazeHeight; j += 2) {
+                placeInteractive(
+                        i,
+                        Math.min(i + 2, mazeWidth),
+                        j,
+                        Math.min(j + 2, mazeHeight)
+                );
+            }
+        }
+        // If any interactives left, place them somewhere
+        while (enemyNum + npcNum + trapNum > 0) {
+            placeInteractive(0, mazeWidth, 0, mazeHeight);
+        }
+    }
+
+    /**
+     * Place an interactive in the given area
+     *
+     * @param xMin The boundaries of the area
+     * @param xMax The boundaries of the area
+     * @param yMin The boundaries of the area
+     * @param yMax The boundaries of the area
+     */
+    private void placeInteractive(int xMin, int xMax, int yMin, int yMax) {
+        TiledMapTileLayer interactivesLayer = (TiledMapTileLayer) map.getLayers().get("interactives");
+        Interactive interactive = null;
+        // The coordinates where the interactive will be placed
+        int x = 0;
+        int y = 0;
+        boolean allowed = false;
+
+        int errorCount = 0;
+
+        while (!allowed) {
+            do {
+                // Find a path which doesn't have an interactive yet
+                x = MathUtils.random(xMax - xMin - 1) + xMin;
+                y = MathUtils.random(yMax - yMin - 1) + yMin;
+            } while (mazeData[x][y].getInteractive() != null);
+            // Choose a random type on interactive.
+            // TODO optimize this. How not choose a type which is not allowed any more? (no more left)
+            switch (MathUtils.random(2)) {
+                case 0:
+                    interactive = enemyNum > 0 ? new Enemy() : null;
+                    break;
+                case 1:
+                    interactive = npcNum > 0 ? new NPC() : null;
+                    break;
+                case 2:
+                    interactive = trapNum > 0 ? new Trap() : null;
+            }
+            // Check if the interactive is allowed there
+            allowed = isPlacementAllowed(interactive, x, y);
+            errorCount++;
+            if (errorCount > 10) {
+                // If the placement was unsuccessful 10 times, don't place the interactive anywhere
+                // TODO not ideal approach. Optimize placement randomization
+                break;
+            }
+        }
+        // Place the interactive if the randomization was successful
+        if (interactive != null) {
+            interactive.setPosition(x, y);
+            mazeData[x][y].setInteractive(interactive);
+            TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+            // Reduce the corresponding interactive's counter and set the tile on the map
+            if (interactive instanceof Enemy) {
+                enemyNum--;
+                cell.setTile(new StaticTiledMapTile(enemies.get(MathUtils.random(enemies.size - 1))));
+            } else if (interactive instanceof NPC) {
+                npcNum--;
+                cell.setTile(new StaticTiledMapTile(shop));
+            } else if (interactive instanceof Trap) {
+                trapNum--;
+                cell.setTile(new StaticTiledMapTile(trap));
+            }
+            interactivesLayer.setCell(x * 2 + 1, y * 2 + 1, cell);
+        }
+    }
+
+    /**
+     * Checks if the given interactive is allowed to be placed at the given coordinates
+     */
+    private boolean isPlacementAllowed(Interactive interactive, int x, int y) {
+        if (interactive == null) {
+            // Null placement is not allowed
+            return false;
+        }
+        // Only 2 interactives is allowed in a 2x2 square. Count the existing ones.
+        int count = 0;
+        // Start from x-1 if it's inside the maze and go till... TODO check if this is correct
+        for (int i = (x == 0 ? x : x - 1); i <= (x >= mazeWidth ? mazeWidth - 1 : x); i++) {
+            // Start from y-1 if it's inside the maze and go till... TODO check if this is correct
+            for (int j = (y == 0 ? y : y - 1); j <= (j >= mazeHeight ? mazeHeight - 1 : j); j++) {
+                Interactive existing = mazeData[i][j].getInteractive();
+                if (existing != null) {
+                    count++;
+                    if (interactive.getClass().equals(existing.getClass())) {
+                        // Only one instance of an interactive is allowed in a 2x2 square
+                        return false;
+                    }
+                }
+            }
+        }
+        // Only 2 interactives is allowed in a 2x2 square. If there are more then one already, return false.
+        return count < 2;
+    }
+
     // Former game menu
     /*
     /**
@@ -528,96 +699,9 @@ public class GameScreen extends AbstractFixSizedScreen {
 
         tempInteractive = null;
 
-        map[player.getX()][player.getY()].setInteractive(player);
-        generateMapItems();
         generateExit();
     }
     */
-
-    // Generate map items
-    /*
-    private int enemyNum;
-    private int npcNum;
-    private int trapNum;
-
-    private void generateMapItems() {
-        float max = (width % 2 == 0 ? width : width + 1) * (height % 2 == 0 ? height : height + 1);
-        enemyNum = (int) Math.round(max * ENEMIES_PERCENT / 100);
-        npcNum = (int) Math.round(max * NPCS_PERCENT / 100);
-        trapNum = (int) Math.round(max * TRAPS_PERCENT / 100);
-
-        for (int i = 0; i < width; i += 2) {
-            for (int j = 0; j < height; j += 2) {
-                placeInteractive(
-                        i,
-                        Math.min(i + 2, width),
-                        j,
-                        Math.min(j + 2, height)
-                );
-            }
-        }
-        while (enemyNum + npcNum + trapNum > 0) {
-            placeInteractive(0, width, 0, height);
-        }
-    }
-
-    private void placeInteractive(int xMin, int xMax, int yMin, int yMax) {
-        Interactive interactive = null;
-        int x = 0;
-        int y = 0;
-        boolean allowed = false;
-
-        int errorCount = 0;
-
-        while (!allowed) {
-            do {
-                x = rnd.nextInt(xMax - xMin) + xMin;
-                y = rnd.nextInt(yMax - yMin) + yMin;
-            } while (map[x][y].getInteractive() != null);
-            switch (rnd.nextInt(3)) {
-                case 0:
-                    interactive = enemyNum > 0 ? new Enemy() : null;
-                    break;
-                case 1:
-                    interactive = npcNum > 0 ? new NPC() : null;
-                    break;
-                case 2:
-                    interactive = trapNum > 0 ? new Trap() : null;
-            }
-            allowed = isPlacementAllowed(interactive, x, y);
-            errorCount++;
-            if (errorCount > 10) {
-                break;
-            }
-        }
-        if (errorCount <= 10) {
-            interactive.setPosition(x, y);
-        }
-        map[x][y].setInteractive(interactive);
-        if (interactive instanceof Enemy) enemyNum--;
-        else if (interactive instanceof NPC) npcNum--;
-        else if (interactive instanceof Trap) trapNum--;
-    }
-
-    private boolean isPlacementAllowed(Interactive interactive, int x, int y) {
-        if (interactive == null) {
-            return false;
-        }
-        int count = 0;
-        for (int i = (x == 0 ? x : x - 1); i <= (x >= width ? width - 1 : x); i++) {
-            for (int j = (y == 0 ? y : y - 1); j <= (j >= height ? height - 1 : j); j++) {
-                Interactive existing = map[i][j].getInteractive();
-                if (existing != null) {
-                    count++;
-                    if (interactive.getClass().equals(existing.getClass())) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return count < 2;
-    }
-     */
 
     // Generate exit
     /*
