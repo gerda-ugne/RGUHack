@@ -2,34 +2,17 @@ package gerda.arcfej.dreamrealm.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.maps.MapLayers;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectSet;
-import com.badlogic.gdx.utils.OrderedSet;
-import com.badlogic.gdx.utils.Predicate;
-import com.badlogic.gdx.utils.Predicate.PredicateIterator;
 import gerda.arcfej.dreamrealm.GameCore;
-import gerda.arcfej.dreamrealm.interactives.*;
-import gerda.arcfej.dreamrealm.map.Field;
-
-import static com.badlogic.gdx.graphics.g2d.TextureAtlas.*;
+import gerda.arcfej.dreamrealm.map.Map;
 
 /**
  *
@@ -37,33 +20,9 @@ import static com.badlogic.gdx.graphics.g2d.TextureAtlas.*;
 public class GameScreen extends AbstractFixSizedScreen {
 
     /**
-     * Texture atlases
+     * The map on the Game Screen
      */
-    private TextureAtlas dungeon;
-    private TextureAtlas interactives;
-    private TextureAtlas enemyAtlas;
-
-    /**
-     * Textures to be used in the game.
-     */
-    private Array<AtlasRegion> walls;
-    private Array<AtlasRegion> enemies;
-    private AtlasRegion exit;
-    private AtlasRegion pathTexture;
-    private AtlasRegion playerTexture;
-    private AtlasRegion deadEnemy;
-    private AtlasRegion shop;
-    private AtlasRegion trap;
-
-    /**
-     * The visual representation of the maze
-     */
-    private TiledMap map;
-
-    /**
-     * The camera the map is displayed through
-     */
-    private OrthographicCamera camera;
+    private Map map;
 
     /**
      * The area the map will be drawn in
@@ -80,83 +39,10 @@ public class GameScreen extends AbstractFixSizedScreen {
      */
     private final int mapAreaHeight = 675;
 
-    /**
-     * Responsible to render the map on the screen
-     */
-    private TiledMapRenderer mapRenderer;
-
-    /**
-     * For map generation
-     */
-    private int enemiesPercent= 12;
-    private int shopsPercent = 6;
-    private int trapsPercent = 8;
-    private int mazeWidth = 10;
-    private int mazeHeight = 10;
-    private int tileSize = 320;
-    // Number of tiles
-    private int mapWidth = mazeWidth * 2 + 1;
-    private int mapHeight = mazeHeight * 2 + 1;
-
-    /**
-     * For map displaying
-     */
-    private int viewDistance = 2;
-
-    /**
-     * The data representation of the maze
-     */
-    private Field[][] mazeData;
-
-    /**
-     * The player of the current game
-     */
-    private Player player;
-
-    /**
-     * For interactives generation
-     */
-    private static final int ENEMIES_PERCENT = 12;
-    private static final int NPCS_PERCENT = 6;
-    private static final int TRAPS_PERCENT = 8;
-
     public GameScreen(GameCore gameCore, SpriteBatch batch) {
         super(gameCore, batch);
-        loadTextures();
 
-        // Create the map and its layers
-        map = new TiledMap();
-        createMapLayers();
-
-        mazeData = new Field[mazeWidth][mazeHeight];
-        generateMaze();
-
-        player = new Player(mazeWidth * mazeHeight / 2);
-        // Place the player on the map at a random place
-        player.setPosition(MathUtils.random(mazeWidth - 1), MathUtils.random(mazeHeight - 1));
-        mazeData[player.getX()][player.getY()].setInteractive(player);
-        TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-        cell.setTile(new StaticTiledMapTile(playerTexture));
-        ((TiledMapTileLayer) map.getLayers().get("player"))
-                .setCell(player.getX() * 2 + 1, player.getY() * 2 + 1, cell);
-
-        generateInteractives();
-
-/*        enemies[0] = new Texture(Gdx.files.internal("enemies/bully-minion"));
-        enemies[1] = new Texture(Gdx.files.internal("enemies/ceiling-barnacle"));
-        enemies[2] = new Texture(Gdx.files.internal("enemies/evil-bat"));
-        enemies[3] = new Texture(Gdx.files.internal("enemies/evil-minion"));
-        enemies[4] = new Texture(Gdx.files.internal("enemies/gargoyle"));
-        enemies[5] = new Texture(Gdx.files.internal("enemies/gooey-daemon"));
-        enemies[6] = new Texture(Gdx.files.internal("enemies/grim-reaper"));
-        enemies[7] = new Texture(Gdx.files.internal("enemies/ice-golem"));
-        enemies[8] = new Texture(Gdx.files.internal("enemies/minotaur"));
-        enemies[9] = new Texture(Gdx.files.internal("enemies/shambling-mound"));
-        enemies[10] = new Texture(Gdx.files.internal("enemies/skeleton"));
-        enemies[11] = new Texture(Gdx.files.internal("enemies/spectre"));
-        enemies[12] = new Texture(Gdx.files.internal("enemies/troglodyte"));
-        enemies[13] = new Texture(Gdx.files.internal("enemies/werewolf"));
-*/
+        map = new Map(batch);
 
         // Create layout
         // Root
@@ -175,44 +61,12 @@ public class GameScreen extends AbstractFixSizedScreen {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                map = new TiledMap();
-                createMapLayers();
-                generateMaze();
-                player.setPosition(MathUtils.random(mazeWidth - 1), MathUtils.random(mazeHeight - 1));
-                mazeData[player.getX()][player.getY()].setInteractive(player);
-                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-                cell.setTile(new StaticTiledMapTile(playerTexture));
-                ((TiledMapTileLayer) map.getLayers().get("player"))
-                        .setCell(player.getX() * 2 + 1, player.getY() * 2 + 1, cell);
-                generateInteractives();
-
-                mapRenderer = new OrthogonalTiledMapRenderer(map, batch);
+                map = new Map(batch);
             }
         });
         leftMenu.add(generate);
         root.add(leftMenu);
 
-        // Map
-        float w = Gdx.graphics.getWidth();
-        float h = Gdx.graphics.getHeight();
-        // Set screen ratio
-        if (h > w) {
-            camera = new OrthographicCamera(mapAreaWidth, mapAreaHeight * (h / w));
-        } else {
-            camera = new OrthographicCamera(mapAreaWidth * w / h, mapAreaHeight);
-        }
-        // Set zoom based on view distance
-        camera.zoom = tileSize / camera.viewportHeight * 21/*(viewDistance * 2 + 1)*/;
-        // Center the map on the player
-        // TODO uncomment this and comment out the other
-//        camera.position.set((player.getX() * 2 + 1) * tileSize + tileSize / 2f,
-//                (player.getY() * 2 + 1) * tileSize + tileSize / 2f,
-//                0);
-        camera.position.set(mapWidth * tileSize / 2f,
-                mapHeight * tileSize / 2f,
-                0);
-        camera.update();
-        mapRenderer = new OrthogonalTiledMapRenderer(map, batch);
         mapArea = new Image(new Texture(new Pixmap(mapAreaWidth, mapAreaHeight, Pixmap.Format.Alpha)));
         root.add(mapArea);
 
@@ -230,324 +84,40 @@ public class GameScreen extends AbstractFixSizedScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Draw layout with buttons, menus, etc.
+        stage.getViewport().apply();
+        stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
         stage.act();
         stage.draw();
 
+
+        // Transform the map's actor's bottom-left coordinates to the stage's coordinate system
+        Vector2 stageBottomLeft = mapArea.localToStageCoordinates(new Vector2(mapArea.getX(), mapArea.getY()));
+        // Transform it further to screen coordinates
+        Vector3 screenBottomLeft = stage.getCamera().project(new Vector3(stageBottomLeft.x, stageBottomLeft.y, 0f));
+
+        // Do the same with the top-right coordinates
+        Vector2 stageTopRight = mapArea.localToStageCoordinates(new Vector2(mapArea.getX() + mapArea.getWidth(), mapArea.getY() + mapArea.getHeight()));
+        Vector3 screenTopRight = stage.getCamera().project(new Vector3(stageTopRight.x, stageTopRight.y, 0f));
+
         // Draw map
-        camera.update();
-        // Clip map to a square
-//        Vector2 mapCoordinates = mapArea.localToStageCoordinates(new Vector2(mapArea.getX(), mapArea.getY()));
-//        Rectangle scissors = new Rectangle();
-//        ScissorStack.calculateScissors(camera,
-//                stage.getBatch().getTransformMatrix(),
-//                new Rectangle(mapCoordinates.x, mapCoordinates.y, mapArea.getWidth(), mapArea.getHeight()),
-//                scissors);
-//        if (ScissorStack.pushScissors(scissors)) {
-            // Draw the map inside the rectangle area
-            mapRenderer.setView(camera);
-            mapRenderer.render();
-//            stage.getBatch().flush();
-//            ScissorStack.popScissors();
-//        }
+        map.setScreenBounds(MathUtils.round(screenBottomLeft.x),
+                MathUtils.round(screenBottomLeft.y),
+                MathUtils.round(screenTopRight.x - screenBottomLeft.x),
+                MathUtils.round(screenTopRight.y - screenBottomLeft.y));
+        map.draw();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        super.resize(width, height);
+        stage.getViewport().update(width, height);
+        map.getViewport().update(width, height);
     }
 
     @Override
     public void dispose() {
         super.dispose();
-        dungeon.dispose();
-        interactives.dispose();
-        enemyAtlas.dispose();
-    }
-
-    private void loadTextures() {
-        dungeon = new TextureAtlas("texture_atlases/dungeon.atlas");
-        walls = new Array<>(3);
-        walls.add(dungeon.findRegion("stone-wall"));
-        walls.add(dungeon.findRegion("brick-wall"));
-        walls.add(dungeon.findRegion("broken-wall"));
-
-        exit = dungeon.findRegion("dungeon-gate");
-        pathTexture = dungeon.findRegion("path-tile");
-
-        interactives = new TextureAtlas("texture_atlases/interactives.atlas");
-        playerTexture = interactives.findRegion("player");
-        deadEnemy = interactives.findRegion("dead_enemy");
-        shop = interactives.findRegion("shop");
-        trap = interactives.findRegion("trap");
-
-        enemyAtlas = new TextureAtlas("texture_atlases/enemies.atlas");
-        enemies = enemyAtlas.getRegions();
-    }
-
-    private void createMapLayers() {
-        MapLayers layers = map.getLayers();
-        TiledMapTileLayer background = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
-        background.setName("background");
-        TiledMapTileLayer dungeon = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
-        dungeon.setName("dungeon");
-        TiledMapTileLayer interactives = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
-        interactives.setName("interactives");
-        TiledMapTileLayer player = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
-        player.setName("player");
-
-        layers.add(background);
-        layers.add(dungeon);
-        layers.add(interactives);
-        layers.add(player);
-    }
-
-    // Maze generation
-    // Uses Prim's algorithm to generate a map. All the edges have the same weight, so the next neighbour are chosen randomly.
-    private void generateMaze() {
-        // A 2D array of fields which will become a maze.
-        // Fill it up with empty fields, non of them part of the actual maze yet.
-        for (int i = 0; i < mazeWidth; i++) {
-            for (int j = 0; j < mazeHeight; j++) {
-                Field field = new Field();
-                mazeData[i][j] = field;
-                field.setPosition(i, j);
-            }
-        }
-
-        // A set of fields which are part of a maze. Empty before the maze generation.
-        ObjectSet<Field> inside = new ObjectSet<>(mazeWidth * mazeHeight);
-        // A set of fields at the edge of the already generated maze. (Neighbour fields around the maze)
-        // It will become empty at the end of the generation, when all the map's fields will be part of the maze.
-        OrderedSet<Field> neighbours = new OrderedSet<>(mazeWidth * mazeHeight / 2);
-
-        // Start the maze generation from a random point and add it to the maze (in) as its first field
-        int x = MathUtils.random(mazeWidth - 1);
-        int y = MathUtils.random(mazeHeight - 1);
-        Field newPath = mazeData[x][y];
-        inside.add(newPath);
-        do {
-            // An array of fields adjacent to the previous new path (max 4)
-            Array<Field> adjacents = new Array<>(false, 4);
-            // Try to add all the adjacent fields to the array. IndexOutOfBound exceptions are ignored.
-            try {
-                adjacents.add(mazeData[x - 1][y]);
-            } catch (Exception ignore) { }
-            try {
-                adjacents.add(mazeData[x + 1][y]);
-            } catch (Exception ignore) { }
-            try {
-                adjacents.add(mazeData[x][y - 1]);
-            } catch (Exception ignore) { }
-            try {
-                adjacents.add(mazeData[x][y + 1]);
-            } catch (Exception ignore) { }
-            // Add the new path's adjacent fields to the neighbours of the maze, if they're not already part of the maze.
-            for (Field next : adjacents) {
-                if (!inside.contains(next)) {
-                    neighbours.add(next);
-                }
-            }
-            Field previousPath = newPath;
-
-            // Choose one random neighbour as the next new path
-            newPath = neighbours.removeIndex(MathUtils.random(neighbours.size - 1));
-            x = newPath.getX();
-            y = newPath.getY();
-
-            // Predicates to determine if a field is left, right, up or down to the newly added path.
-            Field finalNewPath = newPath;
-            Predicate<Field> isLeft = field -> field.getY() == finalNewPath.getY() && field.getX() + 1 == finalNewPath.getX();
-            Predicate<Field> isRight = field -> field.getY() == finalNewPath.getY() && field.getX() - 1 == finalNewPath.getX();
-            Predicate<Field> isUp = field -> field.getX() == finalNewPath.getX() && field.getY() - 1 == finalNewPath.getY();
-            Predicate<Field> isDown = field -> field.getX() == finalNewPath.getX() && field.getY() + 1 == finalNewPath.getY();
-            // Combine these predicates
-            Predicate<Field> isNeighbour = field ->
-                    isLeft.evaluate(field) || isRight.evaluate(field) || isUp.evaluate(field) || isDown.evaluate(field);
-
-            // Find a random neighbour (the first one)
-            PredicateIterator<Field> neighbourFilter = new PredicateIterator<>(inside, isNeighbour);
-            Field connect = neighbourFilter.next();
-
-            // Open the connection between the new path and (one of) the neighbouring maze cell then add it to the maze
-            if (isUp.evaluate(connect)) {
-                connect.setDown(true);
-                newPath.setUp(true);
-            } else if (isDown.evaluate(connect)) {
-                connect.setUp(true);
-                newPath.setDown(true);
-            } else if (isRight.evaluate(connect)) {
-                connect.setLeft(true);
-                newPath.setRight(true);
-            } else if (isLeft.evaluate(connect)) {
-                connect.setRight(true);
-                newPath.setLeft(true);
-            }
-            inside.add(newPath);
-        } while (!neighbours.isEmpty()); // Run until there's no more empty fields left
-
-        // Set the graphics
-        TiledMapTileLayer dungeon = (TiledMapTileLayer) map.getLayers().get("dungeon");
-        // Create the bottom and left side of the maze, full of walls
-        for (y = 0; y < dungeon.getHeight(); y++) {
-            TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-            cell.setTile(new StaticTiledMapTile(walls.get(MathUtils.random(walls.size - 1))))
-                    .setRotation(TiledMapTileLayer.Cell.ROTATE_270);
-            dungeon.setCell(0, y, cell);
-        }
-        for (x = 1; x < dungeon.getWidth(); x++) {
-            TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-            cell.setTile(new StaticTiledMapTile(walls.get(MathUtils.random(walls.size - 1))));
-            dungeon.setCell(x, 0, cell);
-        }
-
-        // Go through the maze and fill the map up with walls
-        for (x = 0; x < mazeData.length; x++) {
-            Field[] row = mazeData[x];
-            for (y = 0; y < row.length; y++) {
-                Field path = row[y];
-
-                // Set texture on the path
-                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-                cell.setTile(new StaticTiledMapTile(pathTexture));
-                dungeon.setCell(x * 2 + 1, y * 2 + 1, cell);
-
-                // Set a wall or path on the top
-                TiledMapTileLayer.Cell up = new TiledMapTileLayer.Cell();
-                up.setTile(new StaticTiledMapTile(
-                        path.canUp() ? pathTexture : walls.get(MathUtils.random(walls.size - 1))));
-                dungeon.setCell(x * 2 + 1, y * 2 + 2, up);
-
-                // Set a wall or path on the right
-                TiledMapTileLayer.Cell right = new TiledMapTileLayer.Cell();
-                right.setTile(new StaticTiledMapTile(
-                        path.canRight() ? pathTexture : walls.get(MathUtils.random(walls.size - 1))));
-                // Randomize rotation on the right
-                right.setRotation(MathUtils.randomBoolean() ? TiledMapTileLayer.Cell.ROTATE_90 :TiledMapTileLayer.Cell.ROTATE_270);
-                dungeon.setCell(x * 2 + 2, y * 2 + 1, right);
-
-                // Set the wall in the top-right corner to the path
-                TiledMapTileLayer.Cell upRight = new TiledMapTileLayer.Cell();
-                upRight.setTile(new StaticTiledMapTile(walls.get(MathUtils.random(walls.size - 1))));
-                upRight.setRotation(MathUtils.randomBoolean() ? TiledMapTileLayer.Cell.ROTATE_90 :TiledMapTileLayer.Cell.ROTATE_270);
-                dungeon.setCell(x * 2 + 2, y * 2 + 2, upRight);
-            }
-        }
-    }
-
-    private int enemyNum;
-    private int npcNum;
-    private int trapNum;
-
-    private void generateInteractives() {
-        // Use the maze's dimensions or one bigger number if they're odd
-        float maxInteractives = (mazeWidth % 2 == 0 ? mazeWidth : mazeWidth + 1) * (mazeHeight % 2 == 0 ? mazeHeight : mazeHeight + 1);
-        enemyNum = MathUtils.round(maxInteractives * ENEMIES_PERCENT / 100);
-        npcNum = MathUtils.round(maxInteractives * NPCS_PERCENT / 100);
-        trapNum = MathUtils.round(maxInteractives * TRAPS_PERCENT / 100);
-
-        // Go through the maze by 2x2 square areas and place an interactive in every one of them
-        for (int i = 0; i < mazeWidth; i += 2) {
-            for (int j = 0; j < mazeHeight; j += 2) {
-                placeInteractive(
-                        i,
-                        Math.min(i + 2, mazeWidth),
-                        j,
-                        Math.min(j + 2, mazeHeight)
-                );
-            }
-        }
-        // If any interactives left, place them somewhere
-        while (enemyNum + npcNum + trapNum > 0) {
-            placeInteractive(0, mazeWidth, 0, mazeHeight);
-        }
-    }
-
-    /**
-     * Place an interactive in the given area
-     *
-     * @param xMin The boundaries of the area
-     * @param xMax The boundaries of the area
-     * @param yMin The boundaries of the area
-     * @param yMax The boundaries of the area
-     */
-    private void placeInteractive(int xMin, int xMax, int yMin, int yMax) {
-        TiledMapTileLayer interactivesLayer = (TiledMapTileLayer) map.getLayers().get("interactives");
-        Interactive interactive = null;
-        // The coordinates where the interactive will be placed
-        int x = 0;
-        int y = 0;
-        boolean allowed = false;
-
-        int errorCount = 0;
-
-        while (!allowed) {
-            do {
-                // Find a path which doesn't have an interactive yet
-                x = MathUtils.random(xMax - xMin - 1) + xMin;
-                y = MathUtils.random(yMax - yMin - 1) + yMin;
-            } while (mazeData[x][y].getInteractive() != null);
-            // Choose a random type on interactive.
-            // TODO optimize this. How not choose a type which is not allowed any more? (no more left)
-            switch (MathUtils.random(2)) {
-                case 0:
-                    interactive = enemyNum > 0 ? new Enemy() : null;
-                    break;
-                case 1:
-                    interactive = npcNum > 0 ? new NPC() : null;
-                    break;
-                case 2:
-                    interactive = trapNum > 0 ? new Trap() : null;
-            }
-            // Check if the interactive is allowed there
-            allowed = isPlacementAllowed(interactive, x, y);
-            errorCount++;
-            if (errorCount > 10) {
-                // If the placement was unsuccessful 10 times, don't place the interactive anywhere
-                // TODO not ideal approach. Optimize placement randomization
-                break;
-            }
-        }
-        // Place the interactive if the randomization was successful
-        if (interactive != null) {
-            interactive.setPosition(x, y);
-            mazeData[x][y].setInteractive(interactive);
-            TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-            // Reduce the corresponding interactive's counter and set the tile on the map
-            if (interactive instanceof Enemy) {
-                enemyNum--;
-                cell.setTile(new StaticTiledMapTile(enemies.get(MathUtils.random(enemies.size - 1))));
-            } else if (interactive instanceof NPC) {
-                npcNum--;
-                cell.setTile(new StaticTiledMapTile(shop));
-            } else if (interactive instanceof Trap) {
-                trapNum--;
-                cell.setTile(new StaticTiledMapTile(trap));
-            }
-            interactivesLayer.setCell(x * 2 + 1, y * 2 + 1, cell);
-        }
-    }
-
-    /**
-     * Checks if the given interactive is allowed to be placed at the given coordinates
-     */
-    private boolean isPlacementAllowed(Interactive interactive, int x, int y) {
-        if (interactive == null) {
-            // Null placement is not allowed
-            return false;
-        }
-        // Only 2 interactives is allowed in a 2x2 square. Count the existing ones.
-        int count = 0;
-        // Start from x-1 if it's inside the maze and go till... TODO check if this is correct
-        for (int i = (x == 0 ? x : x - 1); i <= (x >= mazeWidth ? mazeWidth - 1 : x); i++) {
-            // Start from y-1 if it's inside the maze and go till... TODO check if this is correct
-            for (int j = (y == 0 ? y : y - 1); j <= (j >= mazeHeight ? mazeHeight - 1 : j); j++) {
-                Interactive existing = mazeData[i][j].getInteractive();
-                if (existing != null) {
-                    count++;
-                    if (interactive.getClass().equals(existing.getClass())) {
-                        // Only one instance of an interactive is allowed in a 2x2 square
-                        return false;
-                    }
-                }
-            }
-        }
-        // Only 2 interactives is allowed in a 2x2 square. If there are more then one already, return false.
-        return count < 2;
+        map.dispose();
     }
 
     // Former game menu

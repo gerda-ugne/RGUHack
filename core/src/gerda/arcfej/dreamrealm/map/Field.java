@@ -1,6 +1,6 @@
 package gerda.arcfej.dreamrealm.map;
 
-import gerda.arcfej.dreamrealm.interactives.Interactive;
+import gerda.arcfej.dreamrealm.map.interactives.Interactive;
 
 import java.util.Set;
 

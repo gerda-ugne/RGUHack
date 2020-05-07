@@ -1,4 +1,4 @@
-package gerda.arcfej.dreamrealm.interactives;
+package gerda.arcfej.dreamrealm.map.interactives;
 
 /**
  * Trap class represents the
