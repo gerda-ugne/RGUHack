@@ -99,7 +99,7 @@ public class GameScreen extends AbstractFixSizedScreen {
         Vector2 stageTopRight = mapArea.localToStageCoordinates(new Vector2(mapArea.getX() + mapArea.getWidth(), mapArea.getY() + mapArea.getHeight()));
         Vector3 screenTopRight = stage.getCamera().project(new Vector3(stageTopRight.x, stageTopRight.y, 0f));
 
-        // Draw map
+        // Draw map in the mapArea
         map.setScreenBounds(MathUtils.round(screenBottomLeft.x),
                 MathUtils.round(screenBottomLeft.y),
                 MathUtils.round(screenTopRight.x - screenBottomLeft.x),
@@ -272,19 +272,6 @@ public class GameScreen extends AbstractFixSizedScreen {
         generateExit();
     }
     */
-
-    // Generate exit
-    /*
-    private void generateExit() {
-        boolean top = player.getY() % (width / 2) == 0;
-        int x = rnd.nextInt(width);
-        if (top) {
-            map[x][0].setUp(true);
-        } else {
-            map[x][height - 1].setDown(true);
-        }
-    }
-     */
 
     // Display map
     /*

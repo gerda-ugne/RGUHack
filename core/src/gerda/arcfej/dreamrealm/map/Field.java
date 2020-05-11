@@ -27,6 +27,7 @@ public class Field extends Position {
     }
 
     public Field(boolean up, boolean down, boolean left, boolean right, Interactive interactive) {
+        super();
         this.up = up;
         this.down = down;
         this.right = right;

@@ -69,8 +69,8 @@ public class Map implements Disposable {
     private int enemiesPercent= 12;
     private int shopsPercent = 6;
     private int trapsPercent = 8;
-    private int mazeWidth = 10;
-    private int mazeHeight = 10;
+    private int mazeWidth = 20;
+    private int mazeHeight = 20;
     private int tileSize = 320;
     // Number of tiles
     private int mapWidth = mazeWidth * 2 + 1;
@@ -118,13 +118,14 @@ public class Map implements Disposable {
         // Place the player on the map at a random place
         player = new Player(mazeWidth * mazeHeight / 2);
         player.setPosition(MathUtils.random(mazeWidth - 1), MathUtils.random(mazeHeight - 1));
-        mazeData[player.getX()][player.getY()].setInteractive(player);
+        mazeData[player.x][player.y].setInteractive(player);
         playerCell = new Cell();
         playerCell.setTile(new StaticTiledMapTile(playerTexture));
         ((TiledMapTileLayer) map.getLayers().get("player"))
-                .setCell(player.getX() * 2 + 1, player.getY() * 2 + 1, playerCell);
+                .setCell(player.x * 2 + 1, player.y * 2 + 1, playerCell);
 
         generateInteractives();
+        generateExit();
     }
 
     private void loadTextures() {
@@ -237,15 +238,15 @@ public class Map implements Disposable {
 
             // Choose one random neighbour as the next new path
             newPath = neighbours.removeIndex(MathUtils.random(neighbours.size - 1));
-            x = newPath.getX();
-            y = newPath.getY();
+            x = newPath.x;
+            y = newPath.y;
 
             // Predicates to determine if a field is left, right, up or down to the newly added path.
             Field finalNewPath = newPath;
-            Predicate<Field> isLeft = field -> field.getY() == finalNewPath.getY() && field.getX() + 1 == finalNewPath.getX();
-            Predicate<Field> isRight = field -> field.getY() == finalNewPath.getY() && field.getX() - 1 == finalNewPath.getX();
-            Predicate<Field> isUp = field -> field.getX() == finalNewPath.getX() && field.getY() - 1 == finalNewPath.getY();
-            Predicate<Field> isDown = field -> field.getX() == finalNewPath.getX() && field.getY() + 1 == finalNewPath.getY();
+            Predicate<Field> isLeft = field -> field.y == finalNewPath.y && field.x + 1 == finalNewPath.x;
+            Predicate<Field> isRight = field -> field.y == finalNewPath.y && field.x - 1 == finalNewPath.x;
+            Predicate<Field> isUp = field -> field.x == finalNewPath.x && field.y - 1 == finalNewPath.y;
+            Predicate<Field> isDown = field -> field.x == finalNewPath.x && field.y + 1 == finalNewPath.y;
             // Combine these predicates
             Predicate<Field> isNeighbour = field ->
                     isLeft.evaluate(field) || isRight.evaluate(field) || isUp.evaluate(field) || isDown.evaluate(field);
@@ -441,6 +442,51 @@ public class Map implements Disposable {
         return count < 2;
     }
 
+    private void generateExit() {
+        // Generate an exit at the farthest quarter from the player
+        boolean top = player.y <= mazeWidth / 2;
+        boolean left = player.x > mazeHeight / 2;
+        boolean onHorizontal = MathUtils.randomBoolean();
+
+        int x, y;
+        // Exit on horizontal or vertical side
+        if (onHorizontal) {
+            // horizontal
+            x = left ? MathUtils.random(0, mazeWidth / 2) : MathUtils.random(mazeWidth / 2, mazeWidth - 1);
+            y = top ? 0 : mazeHeight - 1;
+        } else {
+            // vertical
+            x = left ? 0 : mazeWidth - 1;
+            y = top ? MathUtils.random(mazeHeight / 2, mazeHeight - 1) : MathUtils.random(0, mazeHeight / 2);
+        }
+
+        TiledMapTileLayer dungeon = (TiledMapTileLayer) map.getLayers().get("dungeon");
+        Cell exit = new Cell();
+        exit.setTile(new StaticTiledMapTile(this.exit));
+
+        Field exitData = mazeData[x][y];
+        if (onHorizontal) {
+            if (top) {
+                exitData.setUp(true);
+                dungeon.setCell(x * 2 + 1, mapHeight - 1, exit);
+            } else {
+                exitData.setDown(true);
+                exit.setFlipVertically(true);
+                dungeon.setCell(x * 2 + 1, 0, exit);
+            }
+        } else {
+            if (left) {
+                exitData.setLeft(true);
+                exit.setRotation(Cell.ROTATE_90);
+                dungeon.setCell(0, y * 2 + 1, exit);
+            } else {
+                exitData.setRight(true);
+                exit.setRotation(Cell.ROTATE_270);
+                dungeon.setCell(mapWidth - 1, y * 2 + 1, exit);
+            }
+        }
+    }
+
     /**
      * The bounds of the map on the screen in screen coordinates
      *
@@ -460,8 +506,9 @@ public class Map implements Disposable {
         // Set zoom based on view distance
         camera.zoom = (viewDistance * 4 + 3) / camera.viewportWidth;
         // Center the map on the player
-        camera.position.set(player.getX() * 2 + 1.5f,
-                player.getY() * 2 + 1.5f,
+//        camera.position.set(mapWidth / 2, mapHeight / 2, 0);
+        camera.position.set(player.x * 2 + 1.5f,
+                player.y * 2 + 1.5f,
                 0);
         camera.update();
 
