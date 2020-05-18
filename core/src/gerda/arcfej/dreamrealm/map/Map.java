@@ -12,14 +12,12 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.*;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import gerda.arcfej.dreamrealm.map.interactives.Player;
 import gerda.arcfej.dreamrealm.map.interactives.Trap;
+import gerda.arcfej.dreamrealm.screens.GameScreen;
 
 public class Map extends Stage implements Disposable {
 
@@ -94,6 +92,7 @@ public class Map extends Stage implements Disposable {
         loadTextures();
 
         map = new TiledMap();
+        setDebugAll(true);
         createMapLayers();
 
         OrthographicCamera camera = new OrthographicCamera();
@@ -121,23 +120,14 @@ public class Map extends Stage implements Disposable {
 
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
-                Pixmap square = new Pixmap(10, 10, Pixmap.Format.RGBA4444);
-                square.setColor(.2f, .5f, .5f, 1);
-                square.drawRectangle(1, 1, 8, 8);
-                Image actor = new Image(new Texture(square));
-                actor.setColor(1, 1, 1, 0);
+                Actor actor = new Actor();
                 actor.setBounds(x, y, 1, 1);
                 int finalX = x;
                 int finalY = y;
                 actor.addListener(new ClickListener() {
                     @Override
-                    public void clicked(InputEvent event, float x1, float y1) {
-                        SequenceAction action = new SequenceAction();
-                        action.addAction(Actions.alpha(1, 1));
-                        action.addAction(Actions.alpha(0, 1));
-                        actor.addAction(action);
-                        System.out.println("Action added to " + finalX + ", " + finalY);
-                        System.out.println(mapWidth + ":" + mapHeight);
+                    public void clicked(InputEvent event, float x, float y) {
+                        GameScreen.setDisplayedText(finalX + ", " + finalY + " has clicked");
                     }
                 });
                 addActor(actor);
@@ -521,6 +511,10 @@ public class Map extends Stage implements Disposable {
         getViewport().update(width, height);
         getViewport().setScreenBounds(x / 2, y / 2, width, height);
         ((OrthographicCamera) getCamera()).setToOrtho(false, mapWidth, mapHeight);
+    }
+
+    public void setViewDistance(int viewDistance) {
+        this.viewDistance = viewDistance;
     }
 
     @Override

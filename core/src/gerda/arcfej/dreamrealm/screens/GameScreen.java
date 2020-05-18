@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import gerda.arcfej.dreamrealm.GameCore;
 import gerda.arcfej.dreamrealm.map.Map;
 import gerda.arcfej.dreamrealm.map.PlayerController;
@@ -40,6 +41,16 @@ public class GameScreen extends AbstractFixSizedScreen {
      * Height of the map on the screen
      */
     private final int mapAreaHeight = 675;
+
+    /**
+     * Text to display in textDisplay
+     */
+    private static String displayedText = "";
+
+    /**
+     * Label to display texts to the user
+     */
+    private Label textDisplay;
 
     public GameScreen(GameCore gameCore, SpriteBatch batch) {
         super(gameCore, batch);
@@ -78,6 +89,15 @@ public class GameScreen extends AbstractFixSizedScreen {
         Table rightMenu = new Table(gameCore.skin);
         rightMenu.add(new TextButton("Right Test", gameCore.skin));
         root.add(rightMenu);
+
+        // Bottom text displayer
+        root.row();
+        // TODO trim to long texts
+        textDisplay = new Label("", gameCore.skin);
+        setDisplayedText("Test");
+        textDisplay.setAlignment(Align.center);
+        root.add(textDisplay).colspan(3);
+
     }
 
     @Override
@@ -88,6 +108,9 @@ public class GameScreen extends AbstractFixSizedScreen {
     @Override
     public void render(float delta) {
         super.render(delta);
+        // Set the displayed text at the bottom
+        textDisplay.setText(displayedText);
+
         // Clear the screen to black
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -127,6 +150,12 @@ public class GameScreen extends AbstractFixSizedScreen {
     public void dispose() {
         super.dispose();
         map.dispose();
+    }
+
+    // TODO fix this dirty mode (remove static modifications)
+    public static void setDisplayedText(String text) {
+        // TODO trim long text
+        displayedText = text;
     }
 
     // Former game menu
