@@ -104,6 +104,7 @@ public class GameScreen extends AbstractFixSizedScreen {
                 MathUtils.round(screenBottomLeft.y),
                 MathUtils.round(screenTopRight.x - screenBottomLeft.x),
                 MathUtils.round(screenTopRight.y - screenBottomLeft.y));
+        map.act();
         map.draw();
     }
 

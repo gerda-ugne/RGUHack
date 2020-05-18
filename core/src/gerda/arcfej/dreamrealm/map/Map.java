@@ -1,6 +1,6 @@
 package gerda.arcfej.dreamrealm.map;
 
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.MapLayers;
@@ -11,13 +11,18 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.*;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import gerda.arcfej.dreamrealm.map.interactives.Player;
 import gerda.arcfej.dreamrealm.map.interactives.Trap;
 
-public class Map implements Disposable {
+public class Map extends Stage implements Disposable {
 
     /**
      * Texture atlases
@@ -44,24 +49,9 @@ public class Map implements Disposable {
     private TiledMap map;
 
     /**
-     * The camera the map is displayed through
-     */
-    private OrthographicCamera camera;
-
-    /**
-     * The viewport the map is displayed in
-     */
-    private Viewport viewport;
-
-    /**
      * Responsible to render the map on the screen
      */
     private TiledMapRenderer renderer;
-
-    /**
-     * The batch to draw with
-     */
-    private Batch batch;
 
     /**
      * For map generation
@@ -97,20 +87,20 @@ public class Map implements Disposable {
     private Cell playerCell;
 
     public Map(Batch batch) {
-        this.batch = batch;
+        super(new FitViewport(0, 0), batch);
 
         loadTextures();
 
         map = new TiledMap();
         createMapLayers();
 
-        camera = new OrthographicCamera();
+        OrthographicCamera camera = new OrthographicCamera();
         camera.setToOrtho(false, mapWidth, mapHeight);
 
         renderer = new OrthogonalTiledMapRenderer(map, 1f / tileSize, batch);
         renderer.setView(camera);
 
-        viewport = new ExtendViewport(mapWidth, mapHeight, camera);
+        setViewport(new ExtendViewport(mapWidth, mapHeight, camera));
 
         mazeData = new Field[mazeWidth][mazeHeight];
         generateMaze();
@@ -494,28 +484,26 @@ public class Map implements Disposable {
      * @param y The bottom-left corner of the bounds
      */
     public void setScreenBounds(int x, int y, int width, int height) {
-        viewport.setScreenBounds(x / 2, y / 2, width, height);
-        camera.setToOrtho(false, mapWidth, mapHeight);
+        getViewport().setScreenBounds(x / 2, y / 2, width, height);
+        ((OrthographicCamera) getCamera()).setToOrtho(false, mapWidth, mapHeight);
     }
 
-    public Viewport getViewport() {
-        return viewport;
-    }
-
+    @Override
     public void draw() {
         // Set zoom based on view distance
-        camera.zoom = (viewDistance * 4 + 3) / camera.viewportWidth;
+        ((OrthographicCamera) getCamera()).zoom = (viewDistance * 4 + 3) / getCamera().viewportWidth;
         // Center the map on the player
 //        camera.position.set(mapWidth / 2, mapHeight / 2, 0);
-        camera.position.set(player.x * 2 + 1.5f,
+        getCamera().position.set(player.x * 2 + 1.5f,
                 player.y * 2 + 1.5f,
                 0);
-        camera.update();
+        getCamera().update();
 
         // Draw
-        batch.setProjectionMatrix(camera.combined);
-        viewport.apply();
+        getBatch().setProjectionMatrix(getCamera().combined);
+        getViewport().apply();
         renderer.render();
+        super.draw();
     }
 
     @Override
