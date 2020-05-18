@@ -29,6 +29,7 @@ public abstract class AbstractFixSizedScreen extends ScreenAdapter {
     public AbstractFixSizedScreen(GameCore gameCore, SpriteBatch batch) {
         this.gameCore = gameCore;
         stage = new Stage(new ScreenViewport(), batch);
+        inputMultiplexer = new InputMultiplexer(stage);
 
         // Set rendering not continuous (save battery), because the game is static unless user input happens.
         Gdx.graphics.setContinuousRendering(false);
@@ -38,7 +39,7 @@ public abstract class AbstractFixSizedScreen extends ScreenAdapter {
     @Override
     public void show() {
         super.show();
-        Gdx.input.setInputProcessor(stage);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     @Override

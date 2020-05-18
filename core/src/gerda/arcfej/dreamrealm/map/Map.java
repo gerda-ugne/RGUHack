@@ -18,7 +18,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import gerda.arcfej.dreamrealm.map.interactives.Player;
 import gerda.arcfej.dreamrealm.map.interactives.Trap;
 
@@ -63,6 +62,7 @@ public class Map extends Stage implements Disposable {
     private int mazeHeight = 20;
     private int tileSize = 320;
     // Number of tiles
+    // The Map class using this coordinate system
     private int mapWidth = mazeWidth * 2 + 1;
     private int mapHeight = mazeHeight * 2 + 1;
 
@@ -87,7 +87,9 @@ public class Map extends Stage implements Disposable {
     private Cell playerCell;
 
     public Map(Batch batch) {
-        super(new FitViewport(0, 0), batch);
+        super(new ExtendViewport(0, 0), batch);
+        ((ExtendViewport) getViewport()).setMinWorldHeight(mapHeight);
+        ((ExtendViewport) getViewport()).setMinWorldWidth(mapWidth);
 
         loadTextures();
 
@@ -100,7 +102,7 @@ public class Map extends Stage implements Disposable {
         renderer = new OrthogonalTiledMapRenderer(map, 1f / tileSize, batch);
         renderer.setView(camera);
 
-        setViewport(new ExtendViewport(mapWidth, mapHeight, camera));
+        getViewport().setCamera(camera);
 
         mazeData = new Field[mazeWidth][mazeHeight];
         generateMaze();
@@ -116,7 +118,34 @@ public class Map extends Stage implements Disposable {
 
         generateInteractives();
         generateExit();
+
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                Pixmap square = new Pixmap(10, 10, Pixmap.Format.RGBA4444);
+                square.setColor(.2f, .5f, .5f, 1);
+                square.drawRectangle(1, 1, 8, 8);
+                Image actor = new Image(new Texture(square));
+                actor.setColor(1, 1, 1, 0);
+                actor.setBounds(x, y, 1, 1);
+                int finalX = x;
+                int finalY = y;
+                actor.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x1, float y1) {
+                        SequenceAction action = new SequenceAction();
+                        action.addAction(Actions.alpha(1, 1));
+                        action.addAction(Actions.alpha(0, 1));
+                        actor.addAction(action);
+                        System.out.println("Action added to " + finalX + ", " + finalY);
+                        System.out.println(mapWidth + ":" + mapHeight);
+                    }
+                });
+                addActor(actor);
+            }
+        }
     }
+
+    // INITIALIZATION
 
     private void loadTextures() {
         dungeon = new TextureAtlas("texture_atlases/dungeon.atlas");
@@ -156,6 +185,7 @@ public class Map extends Stage implements Disposable {
     }
 
     private void createMapLayers() {
+        // TODO global variables
         TiledMapTileLayer background = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
         background.setName("background");
         TiledMapTileLayer dungeon = new TiledMapTileLayer(mapWidth, mapHeight, tileSize, tileSize);
@@ -176,6 +206,8 @@ public class Map extends Stage implements Disposable {
         layers.add(interactives);
         layers.add(player);
     }
+
+    // GENERALIZATION
 
     // Maze generation
     // Uses Prim's algorithm to generate a map. All the edges have the same weight, so the next neighbour are chosen randomly.
@@ -477,6 +509,8 @@ public class Map extends Stage implements Disposable {
         }
     }
 
+    // DISPLAYING
+
     /**
      * The bounds of the map on the screen in screen coordinates
      *
@@ -484,6 +518,7 @@ public class Map extends Stage implements Disposable {
      * @param y The bottom-left corner of the bounds
      */
     public void setScreenBounds(int x, int y, int width, int height) {
+        getViewport().update(width, height);
         getViewport().setScreenBounds(x / 2, y / 2, width, height);
         ((OrthographicCamera) getCamera()).setToOrtho(false, mapWidth, mapHeight);
     }
@@ -505,6 +540,8 @@ public class Map extends Stage implements Disposable {
         renderer.render();
         super.draw();
     }
+
+    // DESTRUCTION
 
     @Override
     public void dispose() {

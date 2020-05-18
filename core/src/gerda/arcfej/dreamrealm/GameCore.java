@@ -2,6 +2,7 @@ package gerda.arcfej.dreamrealm;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -51,6 +52,8 @@ public class GameCore extends Game {
 		game = new GameScreen(this, batch);
 		loadGame = new LoadGameScreen(this, batch);
 		howToPlay = new HowToPlayScreen(this, batch);
+
+		Gdx.input.setCatchKey(Input.Keys.MENU, true);
 
 // TODO		showMainMenu();
 		startGame();
