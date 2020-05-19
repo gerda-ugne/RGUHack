@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import gerda.arcfej.dreamrealm.map.interactives.Player;
+import gerda.arcfej.dreamrealm.map.interactives.Shop;
 import gerda.arcfej.dreamrealm.map.interactives.Trap;
 import gerda.arcfej.dreamrealm.screens.GameScreen;
 
@@ -61,6 +62,7 @@ public class Map extends Stage implements Disposable {
     private int tileSize = 320;
     // Number of tiles
     // The Map class using this coordinate system
+    // TODO merge the two coordinate system
     private int mapWidth = mazeWidth * 2 + 1;
     private int mapHeight = mazeHeight * 2 + 1;
 
@@ -77,6 +79,7 @@ public class Map extends Stage implements Disposable {
     /**
      * The player of the current game
      */
+    // TODO extact it to GameScreen somehow?
     private Player player;
 
     /**
@@ -334,14 +337,14 @@ public class Map extends Stage implements Disposable {
     }
 
     private int enemyNum;
-    private int npcNum;
+    private int shopNum;
     private int trapNum;
 
     private void generateInteractives() {
         // Use the maze's dimensions or one bigger number if they're odd
         float maxInteractives = (mazeWidth % 2 == 0 ? mazeWidth : mazeWidth + 1) * (mazeHeight % 2 == 0 ? mazeHeight : mazeHeight + 1);
         enemyNum = MathUtils.round(maxInteractives * enemiesPercent / 100);
-        npcNum = MathUtils.round(maxInteractives * shopsPercent / 100);
+        shopNum = MathUtils.round(maxInteractives * shopsPercent / 100);
         trapNum = MathUtils.round(maxInteractives * trapsPercent / 100);
 
         // Go through the maze by 2x2 square areas and place an interactive in every one of them
@@ -356,7 +359,7 @@ public class Map extends Stage implements Disposable {
             }
         }
         // If any interactives left, place them somewhere
-        while (enemyNum + npcNum + trapNum > 0) {
+        while (enemyNum + shopNum + trapNum > 0) {
             placeInteractive(0, mazeWidth, 0, mazeHeight);
         }
     }
@@ -392,7 +395,7 @@ public class Map extends Stage implements Disposable {
                     interactive = enemyNum > 0 ? new gerda.arcfej.dreamrealm.map.interactives.Enemy() : null;
                     break;
                 case 1:
-                    interactive = npcNum > 0 ? new gerda.arcfej.dreamrealm.map.interactives.NPC() : null;
+                    interactive = shopNum > 0 ? new Shop() : null;
                     break;
                 case 2:
                     interactive = trapNum > 0 ? new gerda.arcfej.dreamrealm.map.interactives.Trap() : null;
@@ -415,8 +418,8 @@ public class Map extends Stage implements Disposable {
             if (interactive instanceof gerda.arcfej.dreamrealm.map.interactives.Enemy) {
                 enemyNum--;
                 cell.setTile(new StaticTiledMapTile(enemies.get(MathUtils.random(enemies.size - 1))));
-            } else if (interactive instanceof gerda.arcfej.dreamrealm.map.interactives.NPC) {
-                npcNum--;
+            } else if (interactive instanceof Shop) {
+                shopNum--;
                 cell.setTile(new StaticTiledMapTile(shop));
             } else if (interactive instanceof Trap) {
                 trapNum--;
@@ -513,10 +516,6 @@ public class Map extends Stage implements Disposable {
         ((OrthographicCamera) getCamera()).setToOrtho(false, mapWidth, mapHeight);
     }
 
-    public void setViewDistance(int viewDistance) {
-        this.viewDistance = viewDistance;
-    }
-
     @Override
     public void draw() {
         // Set zoom based on view distance
@@ -533,6 +532,69 @@ public class Map extends Stage implements Disposable {
         getViewport().apply();
         renderer.render();
         super.draw();
+    }
+
+    // MODIFICATIONS
+
+    /**
+     * Move the player in the given directions
+     *
+     * @param direction 0 - up
+     *                  1 - right
+     *                  2 - down
+     *                  3 - left
+     */
+    public void movePlayer(int direction) {
+        int currentX = player.x;
+        int currentY = player.y;
+        Field current = mazeData[currentX][currentY];
+        int nextX = currentX;
+        int nextY = currentY;
+
+        // Check if the player can move in the direction or not
+        switch (direction) {
+            case 0:
+                if (mazeData[currentX][currentY].canUp()) {
+                    nextY++;
+                    break;
+                } else return;
+            case 1:
+                if (mazeData[currentX][currentY].canRight()) {
+                    nextX++;
+                    break;
+                } else return;
+            case 2:
+                if (mazeData[currentX][currentY].canDown()) {
+                    nextY--;
+                    break;
+                } else return;
+            case 3:
+                if (mazeData[currentX][currentY].canLeft()) {
+                    nextX--;
+                    break;
+                } else return;
+            default: return;
+        }
+
+        Field destination = null;
+        // Check for winning
+        try {
+            destination = mazeData[nextX][nextY];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // TODO win
+            return;
+        }
+
+        player.setPosition(nextX, nextY);
+        current.setHasPlayer(false);
+        destination.setHasPlayer(true);
+        TiledMapTileLayer layer = ((TiledMapTileLayer) map.getLayers().get("player"));
+        layer.setCell(nextX * 2 + 1, nextY * 2 + 1, playerCell);
+        layer.setCell(currentX * 2 + 1, currentY * 2 + 1, null);
+    }
+
+    public void setViewDistance(int viewDistance) {
+        this.viewDistance = viewDistance;
     }
 
     // DESTRUCTION

@@ -3,6 +3,8 @@ package gerda.arcfej.dreamrealm.map;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector.GestureAdapter;
 
+import static com.badlogic.gdx.Input.*;
+
 public class PlayerController extends GestureAdapter implements InputProcessor {
 
     private Map map;
@@ -13,12 +15,18 @@ public class PlayerController extends GestureAdapter implements InputProcessor {
 
     // GESTURE LISTENER METHODS
 
-    /**
-     * The gesture detector's touchDown event
-     */
     @Override
-    public boolean touchDown(float x, float y, int pointer, int button) {
-        return super.touchDown(x, y, pointer, button);
+    public boolean fling(float velocityX, float velocityY, int button) {
+        // Move the player with gestures
+        boolean isHorizontal = Math.abs(velocityX) > Math.abs(velocityY);
+        if (isHorizontal) {
+            if (velocityX > 0) map.movePlayer(1); // Move right
+            else map.movePlayer(3); // Move left
+        } else {
+            if (velocityY > 0) map.movePlayer(0); // Move up
+            else map.movePlayer(2); // Move down
+        }
+        return true;
     }
 
     // INPUT PROCESSOR METHODS
@@ -30,7 +38,28 @@ public class PlayerController extends GestureAdapter implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-        return false;
+        switch (keycode) {
+            case Keys.W:
+            case Keys.UP:
+                map.movePlayer(0);
+                break;
+            case Keys.D:
+            case Keys.RIGHT:
+                map.movePlayer(1);
+                break;
+            case Keys.S:
+            case Keys.DOWN:
+                map.movePlayer(2);
+                break;
+            case Keys.A:
+            case Keys.LEFT:
+                map.movePlayer(3);
+                break;
+            default:
+                return false;
+        }
+
+        return true;
     }
 
     @Override

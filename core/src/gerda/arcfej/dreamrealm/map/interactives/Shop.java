@@ -4,11 +4,11 @@ package gerda.arcfej.dreamrealm.map.interactives;
  * NPC class contains information about NPCs.
  *
  */
-public class NPC extends Character {
+public class Shop extends Character {
 
     private String name;
 
-    public NPC()
+    public Shop()
     {
         super();
         name = "Stranger";

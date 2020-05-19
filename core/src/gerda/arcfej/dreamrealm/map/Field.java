@@ -17,6 +17,7 @@ public class Field extends Position {
     private boolean left;
 
     private Interactive interactive;
+    private boolean hasPlayer;
 
     public Field() {
         this(false, false, false, false, null);
@@ -89,5 +90,13 @@ public class Field extends Position {
 
     public void setLeft(boolean left) {
         this.left = left;
+    }
+
+    public boolean getHasPlayer() {
+        return hasPlayer;
+    }
+
+    public void setHasPlayer(boolean hasPlayer) {
+        this.hasPlayer = hasPlayer;
     }
 }

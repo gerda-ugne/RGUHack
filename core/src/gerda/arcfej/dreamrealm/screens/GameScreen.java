@@ -61,7 +61,7 @@ public class GameScreen extends AbstractFixSizedScreen {
         PlayerController controller = new PlayerController(map);
         inputMultiplexer.addProcessor(new GestureDetector(controller)); // Detect touchscreen gestures
         inputMultiplexer.addProcessor(controller); // Detect other inputs
-        inputMultiplexer.addProcessor(map); // Detect tiled map inputs
+        inputMultiplexer.addProcessor(map); // Detect clicks on the map's tiles
 
         // Create layout
         // Root
@@ -312,82 +312,8 @@ public class GameScreen extends AbstractFixSizedScreen {
     // Move
     /*
     public boolean movePlayer(String direction) {
-        int playerX = player.getX();
-        int playerY = player.getY();
 
-        int sizeOfField = 1;
-
-        int newX=0;
-        int newY=0;
-
-        try {
-            //up
-            switch (direction) {
-                case "u":
-                    if (map[playerX][playerY].canUp()) {
-
-                            newX = playerX;
-                            newY = playerY - sizeOfField;
-
-
-                    } else {
-                        return false;
-                    }
-                    break;
-                //left
-                case "l":
-                    if (map[playerX][playerY].canLeft()) {
-                        newX = playerX - sizeOfField;
-                        newY = playerY;
-                    } else {
-                        return false;
-                    }
-                    break;
-                    //right
-                case "r":
-                    if (map[playerX][playerY].canRight()) {
-                        newX = playerX + sizeOfField;
-                        newY = playerY;
-                    } else {
-                        return false;
-                    }
-                    break;
-                    //down
-                case "d":
-                    if (map[playerX][playerY].canDown()) {
-                        newX = playerX;
-                        newY = playerY + sizeOfField;
-                    } else {
-                        return false;
-                    }
-                    break;
-                default:
-                    //Invalid input therefore cannot move
-                    return false;
-            }
-            try {
-                Field field = map[newX][newY];
-            } catch (ArrayIndexOutOfBoundsException e) {
-                win();
-            }
-            //Puts down the old interactive
-            if (tempInteractive != null && !(tempInteractive.equals(player))) {
-                map[tempInteractive.getX()][tempInteractive.getY()].setInteractive(tempInteractive);
-                tempInteractive = null;
-            } else {
-                //Sets old position to have no interaction
-                map[playerX][playerY].setInteractive(null);
-            }
-
-            //Saves old interactive
-            tempInteractive = map[newX][newY].getInteractive();
-
-            //Sets new position of the player
-            player.setPosition(newX, newY);
-
-            //Sets new player position to have the marker of the player
-            map[newX][newY].setInteractive(player);
-
+            // Evaluate the interactives at the destination
             Enemy deadEnemy = null;
             if (tempInteractive instanceof Enemy && ((Enemy) tempInteractive).isCharacterAlive()) {
                 // Add enemy to respawn queue if dead
