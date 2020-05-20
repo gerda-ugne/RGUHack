@@ -23,8 +23,8 @@ public class PlayerController extends GestureAdapter implements InputProcessor {
             if (velocityX > 0) map.movePlayer(1); // Move right
             else map.movePlayer(3); // Move left
         } else {
-            if (velocityY > 0) map.movePlayer(0); // Move up
-            else map.movePlayer(2); // Move down
+            if (velocityY > 0) map.movePlayer(2); // Move down
+            else map.movePlayer(0); // Move up
         }
         return true;
     }
@@ -33,7 +33,19 @@ public class PlayerController extends GestureAdapter implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        return false;
+        switch (keycode) {
+            case Keys.W:
+            case Keys.A:
+            case Keys.S:
+            case Keys.D:
+            case Keys.UP:
+            case Keys.RIGHT:
+            case Keys.DOWN:
+            case Keys.LEFT:
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
